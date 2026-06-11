@@ -17,6 +17,13 @@
                         <span>Quản lý Giao diện Client</span>
                     </a>
                 </li>
+                <li class="sub-menu">
+                    <a class="{{ request()->routeIs('admin.clients.pending') ? 'active' : '' }}"
+                        href="{{ route('admin.clients.pending') }}">
+                        <i class="far fa-code"></i>
+                        <span>Quản lý Client</span>
+                    </a>
+                </li>
             </ul>
             <!-- sidebar menu end-->
         </div>

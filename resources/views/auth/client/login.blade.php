@@ -1,7 +1,37 @@
 @extends('layouts.default')
 @section('content')
 @section('title', 'Login - Options Swift')
+@style
+    <style>
+        .alert-status {
+            padding: 12px 15px;
+            background: rgba(89, 234, 30, 0.1);
+            /* Nền xanh neon trong suốt */
+            color: var(--primary-color);
+            /* Chữ xanh neon */
+            border: 1px solid rgba(89, 234, 30, 0.3);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(89, 234, 30, 0.1);
+            animation: slideDown 0.3s ease;
+        }
 
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+@endstyle
 <header>
     <a href="{{ route('home.index') }}" class="logo-container">
         <img src="{{ asset('assets/images/logo/options-swift-logo.png') }}" alt="Options Swift Logo" class="logo-image">
@@ -11,6 +41,11 @@
 <div class="auth-wrapper">
     <div class="auth-card">
         <h2>Login</h2>
+        @if (session('verified_status'))
+            <div class="alert-status">
+                {{ session('verified_status') }}
+            </div>
+        @endif
         <form action="{{ route('login.submit') }}" method="POST">
             @csrf
             <div class="form-group">

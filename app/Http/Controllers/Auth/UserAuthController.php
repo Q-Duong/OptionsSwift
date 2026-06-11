@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Setting;
+use App\Models\Client;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -81,59 +82,60 @@ class UserAuthController extends Controller
         return view('pages.admin.dashboard');
     }
 
-    public function listHtml()
+    // ==========================================
+    // CÁC HÀM XỬ LÝ PHÂN HỆ HTML WIDGETS
+    // ==========================================
+    public function htmlIndex()
     {
         $settings = Setting::latest()->get();
         return view('pages.admin.html.index', compact('settings'));
     }
 
-    // Hiển thị Form Thêm mới
-    public function createHtml()
+    public function htmlCreate()
     {
-        return view('pages.admin.html.html_form');
+        return view('pages.admin.html.form');
     }
 
-    // Xử lý lưu Thêm mới
-    public function storeHtml(Request $request)
+    public function htmlStore(Request $request)
     {
         $validated = $request->validate([
             'key' => ['required', 'string', 'unique:settings,key'],
             'value' => ['required', 'string']
         ]);
 
-        // 1. Lưu database
         $setting = Setting::create($validated);
-
-        // 2. Tự động ghi file tĩnh
         $this->generateStaticHtmlFile($setting);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Đã tạo và xuất file HTML thành công!');
+        return redirect()->route('admin.html.index')->with('success', 'Widget created and deployed successfully!');
     }
 
-    // Hiển thị Form Chỉnh sửa
-    public function editHtml($id)
+    public function htmlEdit($id)
     {
         $setting = Setting::findOrFail($id);
-        return view('pages.admin.html.html_form', compact('setting'));
+        return view('pages.admin.html.form', compact('setting'));
     }
 
-    // Xử lý lưu Chỉnh sửa
-    public function updateHtml(Request $request, $id)
+    public function htmlUpdate(Request $request, $id)
     {
         $setting = Setting::findOrFail($id);
-
         $validated = $request->validate([
             'key' => ['required', 'string', 'unique:settings,key,' . $id],
             'value' => ['required', 'string']
         ]);
 
-        // 1. Cập nhật database (để đổi updated_at)
         $setting->update($validated);
-
-        // 2. Ghi đè lại file tĩnh mới
         $this->generateStaticHtmlFile($setting);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Đã cập nhật file HTML thành công!');
+        return redirect()->route('admin.html.index')->with('success', 'Widget updated successfully!');
+    }
+
+    public function htmlDelete($id)
+    {
+        $setting = Setting::findOrFail($id);
+        Storage::delete("html/{$setting->key}.html"); // Xóa file tĩnh vật lý
+        $setting->delete();
+
+        return redirect()->route('pages.admin.html.index')->with('success', 'Widget deleted completely!');
     }
 
     private function generateStaticHtmlFile($setting)
@@ -143,13 +145,22 @@ class UserAuthController extends Controller
         $compressedHtml = preg_replace('/(\s)+/s', '\\1', $html);
         $compressedHtml = str_replace(["\r", "\n", "\t"], '', $compressedHtml);
 
-        Storage::put("public/html/{$setting->key}.html", $compressedHtml); 
+        Storage::put("public/html/{$setting->key}.html", $compressedHtml);
     }
 
-    // Xử lý Xóa
-    public function deleteHtml($id)
-    {
-        Setting::findOrFail($id)->delete();
-        return redirect()->route('admin.dashboard')->with('success', 'Đã xóa khối HTML!');
+
+    // ==========================================
+    // CÁC HÀM XỬ LÝ PHÂN HỆ CLIENT APPROVALS
+    // ==========================================
+    public function pendingClients() {
+        $pendingClients = Client::where('is_approved', false)->latest()->get();
+        return view('pages.admin.clients.pending', compact('pendingClients'));
+    }
+
+    public function approveClient($id) {
+        $client = Client::findOrFail($id);
+        $client->update(['is_approved' => true]);
+
+        return redirect()->route('admin.clients.pending')->with('success', "Account for {$client->name} approved!");
     }
 }

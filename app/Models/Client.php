@@ -12,7 +12,7 @@ class Client extends Authenticatable
     protected $guard = 'client'; // Khai báo guard
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'is_approved',
     ];
 
     protected $hidden = [

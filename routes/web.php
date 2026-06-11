@@ -55,15 +55,24 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('auth:web')->group(function () {
         Route::get('/dashboard', [UserAuthController::class, 'dashboard'])->name('dashboard');
-        Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
 
-        // Nhóm Route Quản lý HTML (CRUD)
-        Route::get('/html', [UserAuthController::class, 'listHtml'])->name('html.list');
-        Route::get('/html/create', [UserAuthController::class, 'createHtml'])->name('html.create');
-        Route::post('/html/store', [UserAuthController::class, 'storeHtml'])->name('html.store');
-        Route::get('/html/{id}/edit', [UserAuthController::class, 'editHtml'])->name('html.edit');
-        Route::put('/html/{id}/update', [UserAuthController::class, 'updateHtml'])->name('html.update');
-        Route::delete('/html/{id}/delete', [UserAuthController::class, 'deleteHtml'])->name('html.delete');
+        // PHÂN HỆ 1: QUẢN LÝ HTML WIDGETS
+        Route::prefix('html')->name('html.')->group(function () {
+            Route::get('/', [UserAuthController::class, 'htmlIndex'])->name('index');
+            Route::get('/create', [UserAuthController::class, 'htmlCreate'])->name('create');
+            Route::post('/store', [UserAuthController::class, 'htmlStore'])->name('store');
+            Route::get('/{id}/edit', [UserAuthController::class, 'htmlEdit'])->name('edit');
+            Route::put('/{id}/update', [UserAuthController::class, 'htmlUpdate'])->name('update');
+            Route::delete('/{id}/delete', [UserAuthController::class, 'htmlDelete'])->name('delete');
+        });
+
+        // PHÂN HỆ 2: QUẢN LÝ CLIENTS CHỜ DUYỆT
+        Route::prefix('clients')->name('clients.')->group(function () {
+            Route::get('/pending', [UserAuthController::class, 'pendingClients'])->name('pending');
+            Route::post('/{id}/approve', [UserAuthController::class, 'approveClient'])->name('approve');
+        });
+
+        Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
     });
 });
 
