@@ -1,0 +1,67 @@
+.section-file {
+    position: relative;
+    border-radius: 15px;
+    background-color: #f1f0ef;
+    padding: 15px;
+}
+
+.main-file{
+    position: relative;
+    height: 44px;
+    margin-bottom: 15px;
+}
+
+.main-file:last-child{
+    margin-bottom: 0;
+}
+
+.file-content {
+    background-color: #369763;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.file-name {
+    color: #fff;
+    margin: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-action {
+    width: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 15px;
+}
+
+.delete-file, .download-file {
+    cursor: pointer;
+    color: #fff;
+    border-radius: 50%;
+    height: 26px;
+    width: 26px;
+    border: 2px solid transparent;
+    background-color: rgba(0, 0, 0, .5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-file:hover, .download-file:hover{
+    border: 2px solid #fff;
+}
+
+.delete-file ,.dowload-file i {
+    color: #ffffff;
+    font-size: 12px;
+}

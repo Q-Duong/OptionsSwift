@@ -1,0 +1,72 @@
+:root {
+  --primary-color: #59ea1e; /* Màu xanh neon từ logo */
+  --bg-color: #05080a; /* Màu nền tối */
+  --text-main: #ffffff;
+  --text-muted: #a0aab2;
+  --card-bg: #0d1317;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+}
+
+a { text-decoration: none; color: var(--text-main); transition: 0.3s; }
+a:hover { color: var(--primary-color); }
+
+/* --- NAVIGATION --- */
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 5%; background: rgba(5, 8, 10, 0.95);
+  border-bottom: 1px solid #1a242c;
+  position: sticky; top: 0; z-index: 100;
+}
+/* Sửa lỗi logo hình ảnh */
+.logo-container {
+  display: flex; align-items: center;
+}
+.logo-image {
+  height: 70px; /* Điều chỉnh chiều cao cho phù hợp */
+  width: auto;
+}
+.nav-links a { margin-left: 30px; font-weight: 600; text-transform: uppercase; font-size: 14px; }
+.nav-links .btn-outline {
+  border: 1px solid var(--primary-color); color: var(--primary-color);
+  padding: 8px 20px; border-radius: 4px;
+}
+.nav-links .btn-outline:hover { background: var(--primary-color); color: #000; }
+
+/* --- BUTTONS --- */
+.btn-primary {
+  display: block; width: 100%; padding: 12px;
+  background: var(--primary-color); color: #000;
+  border: none; border-radius: 4px; font-weight: bold;
+  text-transform: uppercase; cursor: pointer; transition: 0.3s;
+  text-align: center; font-size: 16px;
+}
+.btn-primary:hover { box-shadow: 0 0 15px rgba(89, 234, 30, 0.4); }
+
+/* --- FORMS (Login/Register) --- */
+.auth-wrapper {
+  display: flex; justify-content: center; align-items: center; min-height: 80vh; padding: 20px;
+}
+.auth-card {
+  background: var(--card-bg); width: 100%; max-width: 400px;
+  padding: 40px; border-radius: 8px;
+  border-top: 3px solid var(--primary-color);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.auth-card h2 { text-align: center; margin-bottom: 30px; font-style: italic; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 14px; }
+.form-group input {
+  width: 100%; padding: 12px; background: #05080a;
+  border: 1px solid #2a343c; color: #fff; border-radius: 4px;
+}
+.form-group input:focus { outline: none; border-color: var(--primary-color); }
+.auth-links { margin-top: 20px; text-align: center; font-size: 14px; color: var(--text-muted); }
+.auth-links a { color: var(--primary-color); }

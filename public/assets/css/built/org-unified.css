@@ -1,0 +1,323 @@
+:root {
+    --sk-glyph: rgb(0, 0, 0);
+    --sk-glyph-gray: rgb(29, 29, 31);
+    --sk-glyph-gray-alpha: rgba(0, 0, 0, 0.88);
+    --sk-glyph-gray-secondary: rgb(110, 110, 115);
+    --sk-glyph-gray-secondary-alpha: rgba(0, 0, 0, 0.56);
+    --sk-glyph-gray-secondary-alt: rgb(66, 66, 69);
+    --sk-glyph-gray-secondary-alt-alpha: rgba(0, 0, 0, 0.72);
+    --sk-glyph-gray-tertiary: rgb(134, 134, 139);
+    --sk-glyph-gray-tertiary-alpha: rgba(0, 0, 0, 0.48);
+    --sk-glyph-blue: rgb(0, 102, 204);
+    --sk-glyph-orange: rgb(182, 68, 0);
+    --sk-glyph-green: rgb(0, 128, 9);
+    --sk-glyph-red: rgb(227, 0, 0);
+    --sk-fill: rgb(255, 255, 255);
+    --sk-fill-secondary: rgb(250, 250, 252);
+    --sk-fill-tertiary: rgb(245, 245, 247);
+    --sk-fill-gray: rgb(29, 29, 31);
+    --sk-fill-gray-alpha: rgba(0, 0, 0, 0.88);
+    --sk-fill-gray-secondary: rgb(134, 134, 139);
+    --sk-fill-gray-secondary-alpha: rgba(0, 0, 0, 0.48);
+    --sk-fill-gray-tertiary: rgb(210, 210, 215);
+    --sk-fill-gray-tertiary-alpha: rgba(0, 0, 0, 0.16);
+    --sk-fill-gray-quaternary: rgb(232, 232, 237);
+    --sk-fill-gray-quaternary-alpha: rgba(0, 0, 0, 0.08);
+    --sk-fill-blue: rgb(0, 113, 227);
+    --sk-fill-orange: rgb(245, 99, 0);
+    --sk-fill-orange-secondary: rgb(255, 249, 244);
+    --sk-fill-green: rgb(3, 161, 14);
+    --sk-fill-green-secondary: rgb(245, 255, 246);
+    --sk-fill-red: rgb(227, 0, 0);
+    --sk-fill-red-secondary: rgb(255, 242, 244);
+    --sk-fill-yellow: rgb(255, 224, 69);
+    --sk-fill-yellow-secondary: rgb(255, 254, 242);
+    --sk-productred: rgb(175, 30, 45);
+    --sk-enviro-green: rgb(0, 217, 89);
+    --sk-enviro-neutral: rgb(232, 232, 237);
+}
+
+.pagination-info {
+    padding: 0 22px;
+    max-width: 330px;
+    margin: 20px auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media only screen and (max-width: 734px) {
+    .pagination-info {
+        padding: 0 10px;
+    }
+}
+
+.pagination-info__text {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.2353641176;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+@media only screen and (max-width: 734px) {
+    .pagination-info__text {
+        font-size: 14px;
+    }
+}
+
+.pagination-ctrl {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+@media only screen and (max-width: 734px) {
+    .pagination-ctrl {
+        margin-top: 13px;
+        margin-bottom: 45px
+    }
+}
+
+.pagination-ctrl.hidden {
+    display: none
+}
+
+.pagination-ctrl__content {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 22px;
+    max-width: 330px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+@media only screen and (max-width: 734px) {
+    .pagination-ctrl__content {
+        padding: 0 16px
+    }
+}
+
+@media only screen and (max-width: 734px) {
+    .pagination-ctrl__content {
+        max-width: 314px
+    }
+}
+
+.pagination-ctrl__btn {
+    align-items: center;
+    background-color: #f5f5f7;
+    border-radius: 2.5882352941rem;
+    color: #6e6e73;
+    display: flex;
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    font-size: 1.6470588235rem;
+    font-weight: 600;
+    height: 2.5882352941rem;
+    justify-content: center;
+    margin-top: -1.2941176471rem;
+    pointer-events: all;
+    transition: 250ms background-color linear, 250ms color linear, 250ms opacity linear;
+    width: 2.5882352941rem;
+    margin-top: 0;
+}
+
+.pagination-ctrl__btn:disabled, .pagination-ctrl__btn.disabled {
+    pointer-events: none;
+    opacity: .4
+}
+
+@media(hover: hover) {
+    .pagination-ctrl__btn:hover {
+        background-color: #e8e8ed;
+        color: #1d1d1f;
+        text-decoration: none
+    }
+}
+
+.pagination-ctrl__btn.hide {
+    display: none
+}
+
+.pagination-ctrl__btn--disabled {
+    pointer-events: none;
+    opacity: .4
+}
+
+.pagination-ctrl__btn:hover, .pagination-ctrl__btn:focus {
+    text-decoration: none
+}
+
+@media(hover: hover) {
+    .pagination-ctrl a.pagination-ctrl__btn:hover {
+        text-decoration: none
+    }
+}
+
+.pagination-ctrl .icon.icon-paginationright, .pagination-ctrl .icon.icon-paginationleft {
+    transform: none;
+}
+
+.pagination-ctrl .icon.pagination-ctrl__btn--next i, .pagination-ctrl .icon.pagination-ctrl__btn--previous i {
+    text-decoration: none;
+    font-size: 20px;
+}
+
+.pagination-ctrl .icon.pagination-ctrl__btn--previous i {
+    padding-inline-end: 2px;
+    display: flex;
+    top: 0;
+}
+
+.pagination-ctrl .icon.pagination-ctrl__btn--next i {
+    display: flex;
+    padding-inline-start: 2px;
+    top: 0;
+}
+
+.pagination-ctrl .icon.pagination-ctrl__btn--previous i {
+    display: flex;
+}
+
+a.icon {
+    text-decoration: none;
+}
+
+.pagination-ctrl__info {
+    font-size: 17px;
+    line-height: 1.2353641176;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    align-items: center;
+    display: flex;
+    flex: 1 0 1px;
+    justify-content: center;
+    text-align: center;
+    min-width: max-content;
+}
+
+.pagination-ctrl__info__text {
+    display: inline-block;
+    vertical-align: middle
+}
+
+.pagination-ctrl .input {
+    font-size: 17px;
+    line-height: 1.2353641176;
+    font-weight: 700;
+    letter-spacing: -0.022em;
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    background-color: rgba(0, 0, 0, 0);
+    border: 1px solid var(--sk-glyph-gray-tertiary);
+    border-radius: 8px;
+    color: var(--sk-glyph-gray);
+    height: 40px;
+    margin-inline-end: 8px;
+    text-align: center;
+    width: 2em;
+}
+
+.pagination-ctrl .pagination-text {
+    min-width: 1.8823529412em
+}
+
+.visuallyhidden {
+    position: absolute;
+    clip: rect(1px, 1px, 1px, 1px);
+    -webkit-clip-path: inset(0 0 99.9% 99.9%);
+    clip-path: inset(0 0 99.9% 99.9%);
+    overflow: hidden;
+    height: 1px;
+    width: 1px;
+    padding: 0;
+    border: 0;
+}
+
+.filter-section {
+    margin: 15px;
+}
+
+@media only screen and (max-width: 734px) {
+    .filter-section {
+        margin: 15px 0;
+    }
+}
+
+.filter-tiles {
+    border-radius: 10px;
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .15), 2px 2px 6px 2px rgba(60, 64, 67, .15);
+    background-color: #fff;
+}
+
+@media only screen and (max-width: 991px) {
+    .filter-tiles:first-child {
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+
+    .filter-tiles {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+}
+
+.filter-title {
+    border-bottom: 2px solid #ced4da;
+    border-radius: 10px 10px 0 0;
+    padding: 10px 0;
+}
+
+.filter-title-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #346fdb;
+    letter-spacing: 0.04em;
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    padding: 0 16px;
+}
+
+@media (max-width: 375px) {
+    .filter-title-text {
+        font-size: .76em;
+    }
+}
+
+.filter-content {
+    padding: 15px;
+}
+
+.filter-content-block {
+    display: flex;
+    align-items: center;
+}
+
+.filter-content-title {
+    font-weight: 600;
+    color: #444;
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+@media (max-width: 375px) {
+    .filter-content-title {
+        font-size: 13px;
+    }
+}
+
+.filter-content-details{
+    font-weight: 600;
+    color: #444;
+    font-size: 16px;
+    font-family: "SF Pro Text", "SF Pro Icons", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+@media (max-width: 375px) {
+    .filter-content-details {
+        font-size: 13px;
+    }
+}
