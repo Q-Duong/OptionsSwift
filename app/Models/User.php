@@ -46,8 +46,4 @@ class User extends Authenticatable
     public function profile(){
         return $this->belongsTo(Profile::class);
     }
-
-    public function task(){
-        return $this->hasMany(Task::class);
-    }
 }

@@ -10,12 +10,15 @@ use App\Models\Setting;
 use App\Models\Client;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class UserAuthController extends Controller
 {
+    // ==========================================
+    // PHÂN HỆ 1: XÁC THỰC ADMIN (LOGIN/REGISTER)
+    // ==========================================
     public function showLoginForm()
     {
-        // Trả về view HTML đăng nhập mà bạn đã có
         return view('auth.user.login');
     }
 
@@ -28,13 +31,11 @@ class UserAuthController extends Controller
 
         if (Auth::guard('web')->attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-
-            // SỬA Ở ĐÂY: Đảm bảo chuyển hướng về đúng route của admin
             return redirect()->intended(route('admin.dashboard'));
         }
 
         return back()->withErrors([
-            'email' => 'Thông tin đăng nhập không chính xác.',
+            'email' => 'Thông tin đăng nhập không chính xác hoặc không có quyền truy cập.',
         ])->onlyInput('email');
     }
 
@@ -48,42 +49,13 @@ class UserAuthController extends Controller
         return redirect()->route('admin.login');
     }
 
-    public function showRegisterForm()
-    {
-        return view('auth.user.register');
-    }
-
-    public function register(Request $request)
-    {
-        // 1. Validate dữ liệu
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'], // Kiểm tra trùng lặp trong bảng users
-            'password' => ['required', 'string', 'min:8', 'confirmed'], // Yêu cầu trường password_confirmation ở HTML
-        ]);
-
-        // 2. Tạo User mới
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
-
-        // 3. Tự động đăng nhập sau khi tạo thành công
-        Auth::guard('web')->login($user);
-
-        // 4. Chuyển hướng về trang quản trị
-        return redirect()->route('admin.dashboard');
-    }
-
-    // Hiển thị danh sách các khối HTML
     public function dashboard()
     {
         return view('pages.admin.dashboard');
     }
 
     // ==========================================
-    // CÁC HÀM XỬ LÝ PHÂN HỆ HTML WIDGETS
+    // PHÂN HỆ 2: QUẢN LÝ KHỐI DỮ LIỆU WIDGETS
     // ==========================================
     public function htmlIndex()
     {
@@ -100,13 +72,14 @@ class UserAuthController extends Controller
     {
         $validated = $request->validate([
             'key' => ['required', 'string', 'unique:settings,key'],
+            'title' => ['nullable', 'string', 'max:255'], // Admin có thể nhập tên đẹp cho Menu
             'value' => ['required', 'string']
         ]);
 
         $setting = Setting::create($validated);
         $this->generateStaticHtmlFile($setting);
 
-        return redirect()->route('admin.html.index')->with('success', 'Widget created and deployed successfully!');
+        return redirect()->route('admin.html.index')->with('success', 'Khởi tạo và biên dịch Widget thành công!');
     }
 
     public function htmlEdit($id)
@@ -120,47 +93,92 @@ class UserAuthController extends Controller
         $setting = Setting::findOrFail($id);
         $validated = $request->validate([
             'key' => ['required', 'string', 'unique:settings,key,' . $id],
+            'title' => ['nullable', 'string', 'max:255'],
             'value' => ['required', 'string']
         ]);
 
         $setting->update($validated);
         $this->generateStaticHtmlFile($setting);
 
-        return redirect()->route('admin.html.index')->with('success', 'Widget updated successfully!');
+        return redirect()->route('admin.html.index')->with('success', 'Đã cập nhật thay đổi và biên dịch lại Widget!');
     }
 
     public function htmlDelete($id)
     {
         $setting = Setting::findOrFail($id);
-        Storage::delete("html/{$setting->key}.html"); // Xóa file tĩnh vật lý
+        // Nhớ lưu file ở thư mục public/html để Client dễ đọc qua route secure
+        Storage::delete("public/html/{$setting->key}.html");
         $setting->delete();
 
-        return redirect()->route('pages.admin.html.index')->with('success', 'Widget deleted completely!');
+        return redirect()->route('admin.html.index')->with('success', 'Đã xóa bỏ hoàn toàn Widget khỏi hệ thống.');
     }
 
     private function generateStaticHtmlFile($setting)
     {
         $html = $setting->value;
 
-        $compressedHtml = preg_replace('/(\s)+/s', '\\1', $html);
-        $compressedHtml = str_replace(["\r", "\n", "\t"], '', $compressedHtml);
+        // Nén HTML để tối ưu tốc độ load cho Scanner
+        $compressedHtml = preg_replace('/[ \t]+/', ' ', $html);
+        $compressedHtml = preg_replace('/[\r\n]+/', "\n", $compressedHtml);
 
         Storage::put("public/html/{$setting->key}.html", $compressedHtml);
     }
 
 
     // ==========================================
-    // CÁC HÀM XỬ LÝ PHÂN HỆ CLIENT APPROVALS
+    // PHÂN HỆ 3: QUẢN LÝ VÀ PHÊ DUYỆT KHÁCH HÀNG
     // ==========================================
-    public function pendingClients() {
-        $pendingClients = Client::where('is_approved', false)->latest()->get();
+    public function allClients()
+    {
+        $clients = Client::orderBy('created_at', 'desc')->get();
+        return view('pages.admin.clients.index', compact('clients'));
+    }
+
+    public function pendingClients()
+    {
+        $pendingClients = Client::where('status', 'pending')
+            ->whereNull('expires_at')
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('pages.admin.clients.pending', compact('pendingClients'));
     }
 
-    public function approveClient($id) {
-        $client = Client::findOrFail($id);
-        $client->update(['is_approved' => true]);
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,approved,denied',
+            'duration' => 'nullable|string'
+        ]);
 
-        return redirect()->route('admin.clients.pending')->with('success', "Account for {$client->name} approved!");
+        $client = Client::findOrFail($id);
+        $client->status = $request->status;
+
+        // Xử lý thời hạn truy cập nếu được duyệt
+        if ($request->status === 'approved') {
+            switch ($request->duration) {
+                case '7_days':
+                    $client->expires_at = Carbon::now()->addDays(7);
+                    break;
+                case '1_month':
+                    $client->expires_at = Carbon::now()->addMonth();
+                    break;
+                case '3_months':
+                    $client->expires_at = Carbon::now()->addMonths(3);
+                    break;
+                case 'lifetime':
+                    $client->expires_at = null; // Trọn đời
+                    break;
+                default:
+                    $client->expires_at = null;
+                    break;
+            }
+        } else {
+            // Nếu Deny hoặc Pending thì xóa ngày hết hạn (Reset)
+            $client->expires_at = null;
+        }
+
+        $client->save();
+
+        return back()->with('success', "Đã cập nhật trạng thái truy cập cho [{$client->name}] thành công!");
     }
 }

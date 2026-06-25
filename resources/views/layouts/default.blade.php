@@ -112,15 +112,10 @@
 
     <script src="{{ versionResource('assets/client/js/jquery-3.3.1.js') }}"></script>
     <script src="{{ versionResource('assets/client/js/bootstrap.js') }}"></script>
-
-    <script src="{{ versionResource('assets/client/js/sticky.js') }}"></script>
-    <script src="{{ versionResource('assets/client/js/counter.js') }}"></script>
-    <script src="{{ versionResource('assets/client/js/custom.js') }}"></script>
     {{-- <script src="{{ versionResource('assets/client/js/jquery-ui.min.js') }}" defer></script> --}}
     <script src="https://kit.fontawesome.com/4b68e3663c.js" crossorigin="anonymous" defer></script>
-    {{-- <script src="{{ versionResource('assets/client/js/main.js') }}"></script> --}}
 
-    <script>
+    {{-- <script>
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });
@@ -155,7 +150,7 @@
         setInterval(function() {
             debugger;
         }, 50);
-    </script>
+    </script> --}}
 
     @stack('js')
 

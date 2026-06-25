@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'isAccountant' => \App\Http\Middleware\AccountantMiddleWare::class,
         'checkSchedule' => \App\Http\Middleware\CheckLoginSchedule::class,
         'checkRoleSchedule' => \App\Http\Middleware\CheckRoleSchedule::class,
+        'client.approved' => \App\Http\Middleware\CheckClientApproval::class,
     ];
 }

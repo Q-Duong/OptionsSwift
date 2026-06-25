@@ -3,9 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\Auth\ClientAuthController;
+use App\Http\Controllers\Client\ClientProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ConfigController;
-use App\Http\Controllers\FileController;
+use App\Http\Controllers\Client\SubscriptionController;
+use App\Http\Controllers\GammaController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\App;
@@ -25,9 +27,17 @@ use Illuminate\Support\Facades\Request;
 //-------------------------------------------- Frontend --------------------------------------------
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 
-// --- ROUTE CHO CLIENT ---
+// Route nhận tín hiệu thanh toán tự động (Webhook)
+Route::post('/webhook/payment', [SubscriptionController::class, 'paymentCallback'])->name('payment.webhook');
+
+// ==========================================
+// KHU VỰC 1: CLIENT (KHÁCH HÀNG)
+// ==========================================
+Route::get('/terms', function () {
+    return view('pages.client.terms');
+})->name('terms');
+// 1.1 Khách vãng lai (Guest)
 Route::middleware('guest:client')->group(function () {
-    // Tên route là 'login' và 'register' (mặc định của Laravel)
     Route::get('/login', [ClientAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [ClientAuthController::class, 'login'])->name('login.submit');
 
@@ -35,28 +45,41 @@ Route::middleware('guest:client')->group(function () {
     Route::post('/register', [ClientAuthController::class, 'register'])->name('register.submit');
 });
 
-Route::middleware('auth:client,web')->group(function () {
-    Route::get('/dashboard', [ClientAuthController::class, 'dashboard'])->name('dashboard');
-    Route::get('/secure-html/{key}', [ClientAuthController::class, 'serveSecureHtml'])->name('html.secure');
+// 1.2 Khách đã đăng nhập (Được phép xem giá & Mua hàng, chưa cần duyệt)
+Route::middleware(['auth:client'])->group(function () {
+    Route::get('/pricing', [SubscriptionController::class, 'pricing'])->name('client.pricing');
+    Route::post('/checkout', [SubscriptionController::class, 'processCheckout'])->name('client.checkout');
+    Route::get('/invoice/{order_code}', [SubscriptionController::class, 'showInvoice'])->name('client.invoice');
+    Route::post('/invoice/{order_code}/pay', [SubscriptionController::class, 'processMockPayment'])->name('client.invoice.pay');
+    Route::get('/payment/success', [SubscriptionController::class, 'paymentSuccess'])->name('client.payment.success');
+    Route::get('/profile', [ClientProfileController::class, 'profile'])->name('client.profile');
+    Route::post('/api/gamma-data', [GammaController::class, 'fetchGammaData'])->name('client.api.gamma');
     Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
 });
 
+// 1.3 Khách VIP (Đã đóng tiền / Đã duyệt / Còn hạn) -> Được vào Terminal
+Route::middleware(['auth:client', 'client.approved'])->group(function () {
+    Route::get('/dashboard', [ClientAuthController::class, 'dashboard'])->name('dashboard');
+    Route::get('/secure-html/{key}', [ClientAuthController::class, 'serveSecureHtml'])->name('html.secure');
+});
 
+
+// ==========================================
+// KHU VỰC 2: ADMIN (QUẢN TRỊ VIÊN)
+// ==========================================
 Route::prefix('admin')->name('admin.')->group(function () {
 
+    // 2.1 Khách vãng lai cố vào Admin
     Route::middleware('guest:web')->group(function () {
         Route::get('/login', [UserAuthController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [UserAuthController::class, 'login'])->name('login.submit');
-
-        // Thường admin do hệ thống cấp tài khoản, nếu không cần tự đăng ký thì bạn có thể xóa 2 dòng dưới
-        Route::get('/register', [UserAuthController::class, 'showRegisterForm'])->name('register');
-        Route::post('/register', [UserAuthController::class, 'register'])->name('register.submit');
     });
 
+    // 2.2 Đã đăng nhập Admin (Tuyệt mật)
     Route::middleware('auth:web')->group(function () {
         Route::get('/dashboard', [UserAuthController::class, 'dashboard'])->name('dashboard');
 
-        // PHÂN HỆ 1: QUẢN LÝ HTML WIDGETS
+        // Phân hệ Widgets (Option Chain, Scanner)
         Route::prefix('html')->name('html.')->group(function () {
             Route::get('/', [UserAuthController::class, 'htmlIndex'])->name('index');
             Route::get('/create', [UserAuthController::class, 'htmlCreate'])->name('create');
@@ -66,10 +89,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{id}/delete', [UserAuthController::class, 'htmlDelete'])->name('delete');
         });
 
-        // PHÂN HỆ 2: QUẢN LÝ CLIENTS CHỜ DUYỆT
+        // Phân hệ duyệt Khách hàng
         Route::prefix('clients')->name('clients.')->group(function () {
+            Route::get('/all', [UserAuthController::class, 'allClients'])->name('index');
             Route::get('/pending', [UserAuthController::class, 'pendingClients'])->name('pending');
-            Route::post('/{id}/approve', [UserAuthController::class, 'approveClient'])->name('approve');
+            Route::put('/{id}/update-status', [UserAuthController::class, 'updateStatus'])->name('update_status');
         });
 
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');

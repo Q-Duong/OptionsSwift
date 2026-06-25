@@ -1,6 +1,16 @@
 @extends('layouts.default_auth')
 @section('title', 'HTML Widgets Manager')
 
+@push('styles')
+<style>
+    .badge {
+        padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 10px;
+    }
+    .badge-scanner { background: rgba(89, 234, 30, 0.1); color: var(--primary-neon); border: 1px solid rgba(89, 234, 30, 0.3); }
+    .badge-flow { background: rgba(160, 170, 178, 0.1); color: var(--text-muted); border: 1px solid rgba(160, 170, 178, 0.3); }
+</style>
+@endpush
+
 @section('content')
 <div class="panel-card">
     <div class="panel-header">
@@ -13,7 +23,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Identifier Key</th>
+                    <th>Identifier Key / Type</th>
                     <th>Last Updated</th>
                     <th style="text-align: right;">Actions</th>
                 </tr>
@@ -22,8 +32,15 @@
                 @forelse($settings as $item)
                     <tr>
                         <td>{{ $item->id }}</td>
-                        <td style="color: var(--primary-neon); font-family: monospace; font-weight: bold;">{{ $item->key }}</td>
-                        <td>{{ $item->updated_at->format('M d, Y') }}</td>
+                        <td>
+                            <strong style="color: var(--primary-neon); font-family: monospace;">{{ $item->key }}</strong>
+                            @if(strpos(strtolower($item->key), 'scanner') !== false)
+                                <span class="badge badge-scanner">Scanner Hub</span>
+                            @else
+                                <span class="badge badge-flow">Data Flow</span>
+                            @endif
+                        </td>
+                        <td>{{ $item->updated_at->format('M d, Y - H:i') }}</td>
                         <td>
                             <div class="action-group">
                                 <a href="{{ route('admin.html.edit', $item->id) }}" class="action-btn btn-edit">Edit</a>

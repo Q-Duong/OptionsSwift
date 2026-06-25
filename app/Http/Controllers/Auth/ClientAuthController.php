@@ -5,16 +5,18 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Setting;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ClientAuthController extends Controller
 {
     public function showLoginForm()
     {
-        // View đăng nhập dành riêng cho client
         return view('auth.client.login');
     }
 
@@ -23,45 +25,47 @@ class ClientAuthController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+            'disclaimer' => ['accepted'],
         ]);
 
-        // Thử thách đăng nhập thông tin cơ bản trước
+        $credentials = $request->only('email', 'password');
+
         if (Auth::guard('client')->attempt($credentials, $request->boolean('remember'))) {
-            
+            $request->session()->regenerate();
             $client = Auth::guard('client')->user();
 
-            // Nếu tài khoản CHƯA ĐƯỢC DUYỆT
-            if (!$client->is_approved) {
-                // Đăng xuất ngay lập tức
+            // 1. CHỐT CHẶN DENIED: Vừa đăng nhập thành công là kiểm tra ngay
+            if ($client->status === 'denied') {
                 Auth::guard('client')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                // Trả về thông báo lỗi cụ thể
-                return back()->withErrors([
-                    'email' => 'Your account is pending admin approval. You will receive an email once approved.',
-                ])->onlyInput('email');
+                return redirect()->route('login')->with('error', 'SYSTEM ALERT: Your account has been suspended. Please contact support.');
             }
 
-            // Nếu đã duyệt, tiến hành vào hệ thống bình thường
-            $request->session()->regenerate();
+            // 2. KIỂM TRA TRẠNG THÁI HOẠT ĐỘNG (PENDING / EXPIRED)
+            $isExpired = $client->expires_at && Carbon::now()->greaterThan(Carbon::parse($client->expires_at));
+
+            if ($client->status !== 'approved' || $isExpired) {
+                // Nếu là tài khoản hết hạn, update status cho sạch data
+                if ($isExpired && $client->status === 'approved') {
+                    $client->update(['status' => 'expired']);
+                }
+                return redirect()->route('client.pricing');
+            }
+
+            // 3. MỌI THỨ OK -> DASHBOARD
             return redirect()->intended(route('dashboard'));
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'The provided credentials do not match our records.'])->onlyInput('email');
     }
-
-
 
     public function logout(Request $request)
     {
         Auth::guard('client')->logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect()->route('login');
     }
 
@@ -76,37 +80,70 @@ class ClientAuthController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:clients'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'selected_plan' => ['nullable', 'in:3_months,6_months,12_months'],
+            'disclaimer' => ['accepted'],
         ]);
 
-        Client::create([
+        // Kiểm tra xem khách đang đi luồng Mua Gói hay luồng Dùng Thử
+        $hasPlan = !empty($validated['selected_plan']);
+
+        $client = Client::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'is_approved' => false, // Tài khoản tạo mới mặc định chưa được duyệt
+
+            // LUỒNG TÁCH BẠCH Ở ĐÂY:
+            // Có chọn gói -> 'pending' (Khóa mỏ, chờ thanh toán)
+            // Không chọn gói -> 'approved' (Cho xài thử 7 ngày)
+            'status' => $hasPlan ? 'pending' : 'approved',
+            'expires_at' => $hasPlan ? null : \Carbon\Carbon::now()->addDays(7),
         ]);
 
-        // BỎ DÒNG: Auth::guard('client')->login($client);
+        Auth::guard('client')->login($client);
 
-        // Chuyển hướng về trang login kèm thông báo chờ duyệt
-        return redirect()->route('login')->with('verified_status', 'Registration successful! Please wait for Admin approval before logging in.');
+        // ==========================================
+        // LUỒNG 2: KHÁCH CÓ Ý ĐỊNH MUA GÓI NGAY
+        // ==========================================
+        if ($hasPlan) {
+            $planKey = $validated['selected_plan'];
+
+            $price = match ($planKey) {
+                '3_months' => 120,
+                '6_months' => 210,
+                '12_months' => 360,
+                default => 0
+            };
+
+            $orderCode = 'OS-' . strtoupper(Str::random(8));
+            Order::create([
+                'order_code' => $orderCode,
+                'client_id' => $client->id,
+                'plan_type' => $planKey,
+                'amount' => $price,
+                'status' => 'pending',
+            ]);
+
+            return redirect()->route('client.invoice', $orderCode)
+                ->with('success', 'Account created! Please complete your payment to activate your plan.');
+        }
+
+        // ==========================================
+        // LUỒNG 1: KHÁCH CHỈ MUỐN DÙNG THỬ
+        // ==========================================
+        return redirect()->route('dashboard')
+            ->with('success', 'Welcome to Options Swift! Your 7-day free trial has been activated.');
     }
 
     public function serveSecureHtml($key)
     {
-        if (!Storage::exists("public/html/{$key}.html")) {
-            abort(404);
-        }
-        $fileContent = Storage::get("public/html/{$key}.html");
-
-        return response($fileContent)->header('Content-Type', 'text/html');
+        if (!Storage::exists("public/html/{$key}.html")) abort(404);
+        return response(Storage::get("public/html/{$key}.html"))->header('Content-Type', 'text/html');
     }
 
     public function dashboard()
     {
-        $user = Auth::guard('client')->user() ?? Auth::guard('web')->user();
-
-        $htmlSetting = Setting::where('key', 'client_dashboard_html')->first();
-
-        return view('pages.client.dashboard.index', compact('user', 'htmlSetting'));
+        $user = Auth::guard('client')->user();
+        $widgets = Setting::orderBy('id', 'desc')->get();
+        return view('pages.client.dashboard.index', compact('user', 'widgets'));
     }
 }
