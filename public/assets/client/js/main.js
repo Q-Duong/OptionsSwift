@@ -1,13 +1,23 @@
-function openNewFlowWindow(tickerSymbol) {
-    const cleanTicker = tickerSymbol.trim().toUpperCase();
+// =====================================================================
+// 1. HÀM MỞ WINDOW MỚI SIÊU TỐC
+// =====================================================================
+function openNewFlowWindow(ticker, expiry) {
+    const cleanTicker = ticker.trim().toUpperCase();
     if (!cleanTicker) return;
-    const targetUrl = optionChainBaseUrl + "?symbol=" + cleanTicker;
-    const windowFeatures =
-        "width=1300,height=850,top=100,left=100,resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no";
+    
+    let targetUrl = optionChainBaseUrl + "?symbol=" + cleanTicker;
+    if (expiry) {
+        targetUrl += "&expiry=" + expiry;
+    }
+
+    // Mở cửa sổ độc lập, đặt tên theo mã để tránh mở trùng nhiều tab
+    const windowFeatures = "width=1400,height=900,scrollbars=yes,resizable=yes";
     window.open(targetUrl, "FlowData_" + cleanTicker, windowFeatures);
 
+    // UX: Tự động đổi tên nút và đóng dropdown (nếu đang mở từ Header/Dashboard)
     const dropdownBtnText = document.getElementById("dropdownBtnText");
     if (dropdownBtnText) dropdownBtnText.innerHTML = `🔍 ${cleanTicker} Flow`;
+    
     const dataFlowDropdown = document.getElementById("dataFlowDropdown");
     if (dataFlowDropdown) dataFlowDropdown.classList.remove("open");
 }
@@ -16,6 +26,7 @@ function openNewFlowWindow(tickerSymbol) {
 // 2. KHỞI TẠO DOM CONTENT LOADED
 // =====================================================================
 document.addEventListener("DOMContentLoaded", function () {
+    
     // --- UI: LOGIC DROPDOWN PROFILE ---
     const profileDropdown = document.getElementById("profileDropdown");
     const userMenuBtn = document.getElementById("userMenuBtn");
@@ -26,8 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
             e.stopPropagation();
             profileDropdown.classList.toggle("open");
             userDropdownMenu.classList.toggle("show");
-            const dataFlowDropdown =
-                document.getElementById("dataFlowDropdown");
+            const dataFlowDropdown = document.getElementById("dataFlowDropdown");
             if (dataFlowDropdown) dataFlowDropdown.classList.remove("open");
         });
     }
@@ -68,7 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 e.preventDefault();
                 const val = this.value.trim();
                 if (val) {
-                    openNewFlowWindow(val);
+                    openNewFlowWindow(val); // Gọi hàm đã được nâng cấp
                     this.value = "";
                     flowItems.forEach((item) => (item.style.display = "block"));
                 }
@@ -80,12 +90,13 @@ document.addEventListener("DOMContentLoaded", function () {
         item.addEventListener("click", function (e) {
             e.stopPropagation();
             const ticker = this.getAttribute("data-ticker");
-            openNewFlowWindow(ticker);
+            openNewFlowWindow(ticker); // Gọi hàm đã được nâng cấp
             if (searchInput) searchInput.value = "";
             flowItems.forEach((i) => (i.style.display = "block"));
         });
     });
 
+    // Đóng các menu khi click ra ngoài
     document.addEventListener("click", function (e) {
         if (profileDropdown && !profileDropdown.contains(e.target)) {
             profileDropdown.classList.remove("open");
@@ -97,70 +108,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // =====================================================================
-    // 3. LOGIC CỬA SỔ POPUP & NHÚNG IFRAME (CÁCH TỐT NHẤT)
+    // 3. LẮNG NGHE TÍN HIỆU TỪ SCANNER
     // =====================================================================
-    const modal = document.getElementById("flowModal");
-    const popupContent = document.getElementById("popupContent");
-    const modalFlowTitle = document.getElementById("modalFlowTitle");
-    const closeModalBtn = document.getElementById("closeModalBtn");
-    const iframeLoader = document.getElementById("iframeLoader");
-
-    // Hàm mở Popup Iframe
-    function openFlowPopup(ticker, expiry) {
-        const cleanTicker = ticker.toUpperCase();
-        if (modalFlowTitle)
-            modalFlowTitle.innerHTML = `DATA FLOW: <span>${cleanTicker}</span>`;
-        if (iframeLoader) iframeLoader.style.display = "flex";
-        if (popupContent) {
-            popupContent.style.opacity = "0";
-            popupContent.innerHTML = "";
-        }
-        if (modal) modal.classList.add("open");
-
-        let targetUrl = optionChainBaseUrl + "?symbol=" + cleanTicker;
-        if (expiry) targetUrl += "&expiry=" + expiry;
-
-        // THÊM CÁC THUỘC TÍNH NÀY ĐỂ TỐI ƯU TỐC ĐỘ:
-        const iframeHTML = `
-        <iframe src="${targetUrl}" 
-                style="width: 100%; height: 100%; border: none; border-radius: 8px; background:#030712;" 
-                loading="eager" 
-                sandbox="allow-same-origin allow-scripts"
-                onload="document.getElementById('iframeLoader').style.display='none'; this.parentElement.style.opacity='1';">
-        </iframe>
-    `;
-
-        if (popupContent) {
-            setTimeout(() => {
-                popupContent.innerHTML = iframeHTML;
-            }, 50);
-        }
-    }
-    // Hàm đóng Popup an toàn
-    function closeFlowWindow() {
-        modal.classList.remove("open");
-        const iframe = popupContent.querySelector("iframe");
-        if (iframe) {
-            iframe.src = "about:blank";
-        }
-
-        setTimeout(() => {
-            popupContent.innerHTML = "";
-            popupContent.style.opacity = "0";
-        }, 300);
-    }
-
-    if (closeModalBtn) closeModalBtn.addEventListener("click", closeFlowWindow);
-    if (modal) {
-        modal.addEventListener("click", function (e) {
-            if (e.target === modal) closeFlowWindow();
-        });
-    }
-
-    // Lắng nghe tín hiệu từ Scanner ở màn hình chính báo mở Popup
     window.addEventListener("message", function (event) {
-        if (event.data && event.data.action === "openFlowPopup") {
-            openFlowPopup(event.data.ticker, event.data.expiry);
+        if (event.data && event.data.action === 'openFlowPopup') {
+            const ticker = event.data.ticker;
+            const expiry = event.data.expiry;
+            openNewFlowWindow(ticker, expiry); 
         }
     });
 });

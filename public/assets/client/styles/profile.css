@@ -1,0 +1,134 @@
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card-box {
+    background: #0d1317;
+    border: 1px solid #1a242c;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #1a242c;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.status-trial {
+    background: rgba(77, 184, 255, 0.1);
+    color: #4db8ff;
+    border: 1px solid rgba(77, 184, 255, 0.3);
+}
+
+.status-pro {
+    background: rgba(89, 234, 30, 0.1);
+    color: #59ea1e;
+    border: 1px solid rgba(89, 234, 30, 0.3);
+}
+
+/* Info List */
+.info-group {
+    margin-bottom: 20px;
+}
+
+.info-group label {
+    display: block;
+    color: #a0aab2;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.info-group .info-val {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Table Billing */
+.billing-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.billing-table th {
+    text-align: left;
+    padding: 12px 15px;
+    color: #a0aab2;
+    font-size: 13px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #1a242c;
+}
+
+.billing-table td {
+    padding: 15px;
+    border-bottom: 1px solid #1a242c;
+    color: #e2ebe8;
+    font-size: 14.5px;
+}
+
+.billing-table tr:last-child td {
+    border-bottom: none;
+}
+
+.bill-status {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.bill-paid {
+    background: rgba(89, 234, 30, 0.1);
+    color: #59ea1e;
+}
+
+.bill-pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.btn-action {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid #59ea1e;
+    color: #59ea1e;
+    padding: 6px 15px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 13px;
+    transition: 0.3s;
+}
+
+.btn-action:hover {
+    background: #59ea1e;
+    color: #000;
+}

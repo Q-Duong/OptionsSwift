@@ -26,9 +26,9 @@
     <meta property="og:type" content="website">
     <link rel='shortcut icon' href="{{ asset('frontend/img/new-logo.jpg') }}" />
     <!-- Css Styles -->
-    <link rel="stylesheet" href="{{ asset('assets/client/styles/bootstrap.css') }}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('assets/client/styles/bootstrap-icons.css') }}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('assets/client/styles/style.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ versionResource('assets/client/styles/bootstrap.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ versionResource('assets/client/styles/bootstrap-icons.css') }}" type="text/css">
+    <link rel="stylesheet" href="{{ versionResource('assets/client/styles/style.css') }}" type="text/css">
     @stack('css')
 
     <style>
@@ -115,7 +115,7 @@
     {{-- <script src="{{ versionResource('assets/client/js/jquery-ui.min.js') }}" defer></script> --}}
     <script src="https://kit.fontawesome.com/4b68e3663c.js" crossorigin="anonymous" defer></script>
 
-    {{-- <script>
+    <script>
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
         });
@@ -150,7 +150,7 @@
         setInterval(function() {
             debugger;
         }, 50);
-    </script> --}}
+    </script>
 
     @stack('js')
 

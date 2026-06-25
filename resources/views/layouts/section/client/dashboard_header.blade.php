@@ -5,8 +5,6 @@
         </a>
     </div>
 
-    @yield('search_bar')
-
     @php
         $user = Auth::guard('client')->user();
         $isTrial = false;

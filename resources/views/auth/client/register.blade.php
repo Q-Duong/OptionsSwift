@@ -1,6 +1,6 @@
 @extends('layouts.default')
 @section('content')
-@section('title', 'Register - Options Swift')
+@section('title', 'Register - ')
 
 <header>
     <a href="{{ route('home.index') }}" class="logo-container">

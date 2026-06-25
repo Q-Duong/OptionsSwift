@@ -1,8 +1,5 @@
 @extends('layouts.default')
 @section('title', 'Institutional Trading Terminal - ')
-@section('search_bar')
-    @include('layouts.section.client.search_bar')
-@endsection
 
 @section('content')
     @include('layouts.section.client.dashboard_header')
@@ -61,169 +58,57 @@
                 <a href="{{ route('client.pricing') }}" class="btn-banner-upgrade">Upgrade To Pro</a>
             </div>
         </div>
-
-        <style>
-            /* ========================================================= */
-            /* CSS CHUNG (CHO MÀN HÌNH MÁY TÍNH & IPAD LỚN)             */
-            /* ========================================================= */
-            .trial-upgrade-banner {
-                position: relative;
-                z-index: 50;
-                background: linear-gradient(90deg, rgba(13, 19, 23, 0.9) 0%, rgba(89, 234, 30, 0.05) 100%);
-                border: 1px solid rgba(89, 234, 30, 0.2);
-                border-left: 4px solid var(--primary-color, #59ea1e);
-                padding: 18px 25px;
-                border-radius: 8px;
-                margin: 15px 20px 0;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 20px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            }
-
-            @media (max-width: 768px) {
-                .trial-upgrade-banner {
-                    margin: 15px;
-                }
-            }
-
-            .banner-content {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                flex: 1;
-            }
-
-            .banner-icon {
-                background: rgba(89, 234, 30, 0.1);
-                min-width: 45px;
-                height: 45px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: var(--primary-color, #59ea1e);
-                font-size: 20px;
-            }
-
-            .banner-text h4 {
-                color: #fff;
-                font-size: 16px;
-                font-weight: bold;
-                margin-bottom: 4px;
-                letter-spacing: 0.5px;
-                display: flex;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-
-            .banner-text h4>span:first-child {
-                color: var(--primary-color, #59ea1e);
-            }
-
-            .banner-text .days-left {
-                background: rgba(77, 184, 255, 0.2);
-                color: #4db8ff;
-                font-size: 11px;
-                padding: 3px 10px;
-                border-radius: 12px;
-                font-weight: normal;
-                text-transform: uppercase;
-                white-space: nowrap;
-            }
-
-            .banner-text p {
-                color: var(--text-muted, #a0aab2);
-                font-size: 13.5px;
-                margin: 0;
-                line-height: 1.4;
-            }
-
-            .btn-banner-upgrade {
-                display: inline-block;
-                background: var(--primary-color, #59ea1e);
-                color: #000;
-                padding: 12px 25px;
-                border-radius: 6px;
-                text-decoration: none;
-                font-weight: bold;
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                box-shadow: 0 0 15px rgba(89, 234, 30, 0.3);
-                transition: all 0.3s ease;
-                border: none;
-                cursor: pointer;
-                text-align: center;
-                white-space: nowrap;
-            }
-
-            .btn-banner-upgrade:hover {
-                background: #4cd115;
-                box-shadow: 0 0 20px rgba(89, 234, 30, 0.5);
-                transform: translateY(-2px);
-            }
-
-            /* ========================================================= */
-            /* CSS RIÊNG CHO ĐIỆN THOẠI (MOBILE RESPONSIVE)             */
-            /* ========================================================= */
-            @media (max-width: 768px) {
-                .trial-upgrade-banner {
-                    flex-direction: column;
-                    /* Xếp dọc các phần tử */
-                    align-items: stretch;
-                    /* Kéo giãn full chiều ngang */
-                    padding: 15px;
-                    border-left: none;
-                    border-top: 4px solid var(--primary-color, #59ea1e);
-                    /* Dời viền màu lên trên */
-                    gap: 15px;
-                }
-
-                .banner-content {
-                    align-items: flex-start;
-                    /* Ép chữ căn trái */
-                }
-
-                .banner-text h4 {
-                    font-size: 14px;
-                }
-
-                .banner-text p {
-                    font-size: 12.5px;
-                }
-
-                .banner-action {
-                    width: 100%;
-                }
-
-                .btn-banner-upgrade {
-                    display: block;
-                    /* Nút to full viền trên Mobile */
-                    width: 100%;
-                    padding: 14px 20px;
-                    font-size: 14px;
-                }
-            }
-
-            /* Ẩn Icon sấm sét ở điện thoại quá nhỏ để tiết kiệm diện tích chữ */
-            @media (max-width: 480px) {
-                .banner-icon {
-                    display: none;
-                }
-            }
-        </style>
     @endif
+
+    <div class="search-center-container">
+        <div class="custom-search-dropdown" id="dataFlowDropdown">
+            <button class="dropdown-toggle-btn" id="dropdownToggleBtn">
+                <span id="dropdownBtnText" style="color: var(--primary-color); font-weight: bold;">🔍 Search Ticker
+                    Flow</span>
+                <span class="arrow">▼</span>
+            </button>
+
+            <div class="dropdown-content-area">
+                <input type="text" id="searchInput" class="dropdown-search-input"
+                    placeholder="Type Ticker & Press Enter...">
+
+                <div class="dropdown-flow-list" id="flowList">
+
+                    <button class="flow-item" data-ticker="SPY">SPY</button>
+                    <button class="flow-item" data-ticker="SPX">SPX</button>
+                    <button class="flow-item" data-ticker="QQQ">QQQ</button>
+                    <button class="flow-item" data-ticker="AAPL">AAPL</button>
+                    <button class="flow-item" data-ticker="MSFT">MSFT</button>
+                    <button class="flow-item" data-ticker="NVDA">NVDA</button>
+                    <button class="flow-item" data-ticker="TSLA">TSLA</button>
+                    <button class="flow-item" data-ticker="AMZN">AMZN</button>
+                    <button class="flow-item" data-ticker="META">META</button>
+
+                    @foreach ($widgets as $widget)
+                        @php $tickerKey = strtoupper(trim($widget->key)); @endphp
+
+                        @if (strpos(strtolower($tickerKey), 'scanner') === false &&
+                                strtolower($tickerKey) !== 'option_chain' &&
+                                !in_array($tickerKey, ['SPY', 'SPX', 'QQQ', 'AAPL', 'MSFT', 'NVDA', 'TSLA', 'AMZN', 'META']))
+                            <button class="flow-item" style="color: #4db8ff;" data-ticker="{{ $tickerKey }}">
+                                {{ $tickerKey }} <span
+                                    style="font-size: 9px; color: var(--text-muted); float: right;">(Custom)</span>
+                            </button>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="terminal-container">
         <main class="main-column">
             <div class="main-header">
                 <h2>MARKET SCANNER</h2>
-                <span style="color: var(--text-muted); font-size: 13px; font-weight: bold;">LIVE DATA STREAM <span
+                <span class="sub-header">LIVE DATA STREAM <span
                         style="color: var(--primary-color);">●</span></span>
             </div>
+
             <div class="scanner-container">
                 @php
                     $scannerWidget = $widgets->firstWhere('key', 'market_scanner');
@@ -243,24 +128,6 @@
                 @endif
             </div>
         </main>
-    </div>
-
-    <div class="flow-modal-overlay" id="flowModal">
-        <div class="flow-modal-window">
-            <div class="modal-header">
-                <h3 id="modalFlowTitle">DATA FLOW: <span>TICKER</span></h3>
-                <button class="close-modal-btn" id="closeModalBtn">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="loader-wrapper" id="iframeLoader" style="display: none;">
-                    <div class="spinner"></div>
-                    <span id="loadingText">Connecting to data node...</span>
-                </div>
-                <div id="popupContent"
-                    style="width: 100%; height: 100%; overflow-y: auto; padding: 15px; background: var(--bg-color);">
-                </div>
-            </div>
-        </div>
     </div>
 @endsection
 

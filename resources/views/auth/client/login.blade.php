@@ -1,6 +1,6 @@
 @extends('layouts.default')
 @section('content')
-@section('title', 'Login - Options Swift')
+@section('title', 'Login - ')
 <style>
     .alert-status {
         padding: 12px 15px;
