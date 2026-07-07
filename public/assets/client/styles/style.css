@@ -62,7 +62,7 @@ header {
   background: var(--primary-color);
   color: #000;
   border: none;
-  border-radius: 4px;
+  border-radius: 15px;
   font-weight: bold;
   text-transform: uppercase;
   cursor: pointer;
@@ -89,7 +89,7 @@ header {
   width: 100%;
   max-width: 400px;
   padding: 40px;
-  border-radius: 8px;
+  border-radius: 20px;
   border-top: 3px solid var(--primary-color);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
@@ -117,7 +117,7 @@ header {
   background: #05080a;
   border: 1px solid #2a343c;
   color: #fff;
-  border-radius: 4px;
+  border-radius: 15px;
 }
 
 .form-group input:focus {
@@ -176,6 +176,77 @@ header {
   object-fit: contain;
 }
 
+.hero {
+  padding: 0;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Sửa để sử dụng banner hình ảnh */
+.banner-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Các phần dưới banner vẫn giữ màu sắc */
+.extra-features {
+  padding: 80px 5%;
+  background: radial-gradient(circle at 50% 50%, rgba(89, 234, 30, 0.1) 0%, transparent 60%);
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 50px;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.section-title span {
+  color: var(--primary-color);
+}
+
+.feature-grid {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.extra-feature-box {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 20px;
+  border: 1px solid #1a242c;
+  transition: 0.3s;
+}
+
+.extra-feature-box:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+}
+
+.extra-feature-icon {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.extra-feature-box h3 {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.extra-feature-box p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
 /* Thanh Search Center */
 .search-center-container {
   display: flex;
@@ -207,7 +278,7 @@ header {
   border: 1px solid var(--border-color);
   color: #fff;
   padding: 6px 15px;
-  border-radius: 4px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
@@ -239,7 +310,7 @@ header {
   background: #0d1317;
   border: 1px solid var(--border-color);
   border-top: 2px solid var(--primary-color);
-  border-radius: 4px;
+  border-radius: 15px;
   width: 220px;
   padding: 10px 0;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
@@ -327,7 +398,7 @@ header {
   background: #05080a;
   border: 1px solid var(--border-color);
   color: #fff;
-  border-radius: 4px;
+  border-radius: 15px;
   font-size: 13px;
   text-align: left;
   cursor: pointer;
@@ -354,7 +425,7 @@ header {
   width: 100%;
   background: #0d1317;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 15px;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9);
   z-index: 100;
   overflow: hidden;
@@ -516,53 +587,6 @@ header {
   transform: scale(1);
 }
 
-.modal-header {
-  padding: 15px 25px;
-  border-bottom: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #05080a;
-}
-
-.modal-header h3 {
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 15px;
-}
-
-.modal-header h3 span {
-  color: var(--primary-color);
-}
-
-.close-modal-btn {
-  background: transparent;
-  border: none;
-  color: #ff4d4d;
-  font-size: 28px;
-  cursor: pointer;
-  line-height: 1;
-  transition: 0.2s;
-}
-
-.close-modal-btn:hover {
-  transform: scale(1.1);
-  text-shadow: 0 0 10px rgba(255, 77, 77, 0.5);
-}
-
-/* Bật GPU Acceleration chống lag cho thanh cuộn */
-.modal-body {
-  transform: translate3d(0, 0, 0);
-  -webkit-overflow-scrolling: touch;
-  will-change: scroll-position;
-  flex: 1;
-  padding: 0;
-  overflow: hidden;
-  background: var(--bg-color);
-  position: relative;
-}
-
 .loader-wrapper {
   position: absolute;
   top: 0;
@@ -687,7 +711,7 @@ header {
   border: 1px solid rgba(89, 234, 30, 0.2);
   border-left: 4px solid var(--primary-color, #59ea1e);
   padding: 18px 25px;
-  border-radius: 8px;
+  border-radius: 20px;
   margin: 15px 20px 0;
   display: flex;
   align-items: center;
@@ -760,7 +784,7 @@ header {
   background: var(--primary-color, #59ea1e);
   color: #000;
   padding: 12px 25px;
-  border-radius: 6px;
+  border-radius: 12px;
   text-decoration: none;
   font-weight: bold;
   font-size: 13px;
@@ -872,7 +896,7 @@ header {
 .pricing-card {
   background: #0d1317;
   border: 1px solid #1a242c;
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 40px 30px;
   width: 350px;
   display: flex;
@@ -980,44 +1004,75 @@ header {
   color: #ff4d4d;
 }
 
-.btn-subscribe {
-  display: block;
-  text-align: center;
-  text-decoration: none;
-  background: transparent;
-  border: 2px solid #1a242c;
-  color: #fff;
-  padding: 15px;
-  width: 100%;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: bold;
+/* Thiết kế nút bấm Xanh Neon rực rỡ dành riêng cho Pricing */
+.btn-pricing-neon {
+  background: #59ea1e;
+  color: #000000;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 15px;
+  font-weight: 900;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 1px;
+  width: 100%;
   cursor: pointer;
-  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(89, 234, 30, 0.2);
 }
 
-.btn-subscribe:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: #fff;
+.btn-pricing-neon:hover:not(.is-loading) {
+  background: #4bd218;
+  color: #000000;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(89, 234, 30, 0.5);
 }
 
-.pricing-card.popular .btn-subscribe {
-  background: #59ea1e;
-  color: #000;
-  border: none;
+.btn-pricing-neon:active:not(.is-loading) {
+  transform: translateY(1px);
 }
 
-.pricing-card.popular .btn-subscribe:hover {
-  background: #4cd115;
-  box-shadow: 0 0 15px rgba(89, 234, 30, 0.4);
+/* Trạng thái Loading */
+.btn-pricing-neon.is-loading {
+  pointer-events: none;
+  background: rgba(89, 234, 30, 0.5);
+  color: rgba(0, 0, 0, 0.7);
+  box-shadow: none;
+}
+
+/* Vòng xoay Spinner (nếu bác chưa để ở layout chung thì copy đoạn này vào) */
+.auth-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin-auth 0.75s linear infinite;
+}
+
+.btn-pricing-neon.is-loading .auth-spinner {
+  display: block;
+}
+
+@keyframes spin-auth {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-trial {
   display: inline-block;
   background: #59ea1e;
-  color: #000;
+  color: #000000;
   padding: 12px 30px;
   border-radius: 30px;
   text-decoration: none;
@@ -1031,8 +1086,10 @@ header {
 }
 
 .btn-trial:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(89, 234, 30, 0.5);
+  background: #4bd218;
+  color: #000000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(89, 234, 30, 0.6);
 }
 
 @media (max-width: 900px) {
@@ -1043,5 +1100,78 @@ header {
 
   .pricing-card.popular:hover {
     transform: translateY(-10px);
+  }
+}
+
+/* Nút Submit chuẩn Neon Xanh của Options Swift */
+.btn-neon-submit {
+  background: #59ea1e;
+  color: #000000;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 15px;
+  font-weight: 800;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  width: 100%;
+  /* Trải dài full form */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(89, 234, 30, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hiệu ứng Hover tỏa sáng */
+.btn-neon-submit:hover:not(.is-loading) {
+  background: #4bd218;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(89, 234, 30, 0.6);
+}
+
+/* Hiệu ứng nhấn (Click) */
+.btn-neon-submit:active:not(.is-loading) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(89, 234, 30, 0.4);
+}
+
+/* TRẠNG THÁI LOADING KHI BỊ KHÓA */
+.btn-neon-submit.is-loading {
+  pointer-events: none;
+  /* Khóa chết thao tác click */
+  background: rgba(89, 234, 30, 0.5);
+  /* Mờ đi báo hiệu đang xử lý */
+  box-shadow: none;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Vòng xoay Spinner (Chỉ hiện khi bị thêm class is-loading) */
+.auth-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin-auth 0.75s linear infinite;
+}
+
+.btn-neon-submit.is-loading .auth-spinner {
+  display: block;
+  /* Hiện vòng xoay */
+}
+
+@keyframes spin-auth {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }

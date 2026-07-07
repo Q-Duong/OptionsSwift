@@ -53,7 +53,7 @@
             </div>
         @endif
 
-        <form action="{{ route('login.submit') }}" method="POST">
+        <form action="{{ route('login.submit') }}" method="POST" id="formLogin">
             @csrf
             <div class="form-group">
                 <label>Email</label>
@@ -82,7 +82,11 @@
                 </label>
             </div>
             <!-- KẾT THÚC: DISCLAIMER CHECKBOX -->
-            <button type="submit" class="btn-primary">Login</button>
+            {{-- <button type="submit" class="btn-primary">Login</button> --}}
+            <button type="submit" class="btn-neon-submit" id="btnLogin">
+                <span class="auth-spinner"></span>
+                <span class="btn-text">Login</span>
+            </button>
         </form>
         <div class="auth-links">
             Don't have an account? <a href="{{ route('register') }}">Sign up now</a>

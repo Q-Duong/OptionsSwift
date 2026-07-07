@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -34,23 +35,24 @@ class ClientAuthController extends Controller
             $request->session()->regenerate();
             $client = Auth::guard('client')->user();
 
-            // 1. CHỐT CHẶN DENIED: Vừa đăng nhập thành công là kiểm tra ngay
+            // 1. CHỐT CHẶN DENIED: Vừa đăng nhập thành công là kiểm tra ngay (Giữ nguyên nếu bác có tính năng ban acc)
             if ($client->status === 'denied') {
                 Auth::guard('client')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                return redirect()->route('login')->with('error', 'SYSTEM ALERT: Your account has been suspended. Please contact support.');
+                return redirect()->route('login')->with('error', 'SYSTEM ALERT: Your account has been suspended.');
             }
 
-            // 2. KIỂM TRA TRẠNG THÁI HOẠT ĐỘNG (PENDING / EXPIRED)
-            $isExpired = $client->expires_at && Carbon::now()->greaterThan(Carbon::parse($client->expires_at));
+            // 2. KIỂM TRA TRẠNG THÁI GÓI CƯỚC BẰNG CASHIER
+            // Kiểm tra xem khách có đang dùng gói thuê bao nào không (ví dụ tên gói mặc định là 'default')
+            $isSubscribed = $client->subscribed('default');
 
-            if ($client->status !== 'approved' || $isExpired) {
-                // Nếu là tài khoản hết hạn, update status cho sạch data
-                if ($isExpired && $client->status === 'approved') {
-                    $client->update(['status' => 'expired']);
-                }
+            // Kiểm tra xem khách có đang trong thời gian Trial không (nếu bác setup trial qua Cashier)
+            $onTrial = $client->onGenericTrial() || $client->onTrial('default');
+
+            if (!$isSubscribed && !$onTrial) {
+                // Nếu không có gói nào đang active và cũng không trong thời gian free -> Ra đóng tiền
                 return redirect()->route('client.pricing');
             }
 
@@ -76,62 +78,34 @@ class ClientAuthController extends Controller
 
     public function register(Request $request)
     {
+        // 1. Validate dữ liệu đầu vào
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:clients'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'selected_plan' => ['nullable', 'in:3_months,6_months,12_months'],
+            'plan_type' => ['nullable', 'string'], // Chứa mã Price ID từ form (VD: price_123xxx)
             'disclaimer' => ['accepted'],
         ]);
 
-        // Kiểm tra xem khách đang đi luồng Mua Gói hay luồng Dùng Thử
-        $hasPlan = !empty($validated['selected_plan']);
-
+        // 2. Tạo tài khoản cục bộ (Chỉ lưu thông tin định danh)
         $client = Client::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-
-            // LUỒNG TÁCH BẠCH Ở ĐÂY:
-            // Có chọn gói -> 'pending' (Khóa mỏ, chờ thanh toán)
-            // Không chọn gói -> 'approved' (Cho xài thử 7 ngày)
-            'status' => $hasPlan ? 'pending' : 'approved',
-            'expires_at' => $hasPlan ? null : \Carbon\Carbon::now()->addDays(7),
+            'status' => 'active',
         ]);
 
-        Auth::guard('client')->login($client);
-
-        // ==========================================
-        // LUỒNG 2: KHÁCH CÓ Ý ĐỊNH MUA GÓI NGAY
-        // ==========================================
-        if ($hasPlan) {
-            $planKey = $validated['selected_plan'];
-
-            $price = match ($planKey) {
-                '3_months' => 120,
-                '6_months' => 210,
-                '12_months' => 360,
-                default => 0
-            };
-
-            $orderCode = 'OS-' . strtoupper(Str::random(8));
-            Order::create([
-                'order_code' => $orderCode,
-                'client_id' => $client->id,
-                'plan_type' => $planKey,
-                'amount' => $price,
-                'status' => 'pending',
-            ]);
-
-            return redirect()->route('client.invoice', $orderCode)
-                ->with('success', 'Account created! Please complete your payment to activate your plan.');
+        if (!empty($validated['plan_type'])) {
+            session(['pending_plan_type' => $validated['plan_type']]);
         }
 
-        // ==========================================
-        // LUỒNG 1: KHÁCH CHỈ MUỐN DÙNG THỬ
-        // ==========================================
-        return redirect()->route('dashboard')
-            ->with('success', 'Welcome to Options Swift! Your 7-day free trial has been activated.');
+        // 3. Gửi email xác thực đi ngay lập tức
+        event(new Registered($client));
+
+        // 4. Đăng nhập tự động
+        Auth::guard('client')->login($client);
+
+        return redirect()->route('verification.notice');
     }
 
     public function serveSecureHtml($key)

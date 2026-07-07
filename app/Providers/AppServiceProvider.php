@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
-use App\Models\Service;
-use App\Models\BlogCategory;
+use Laravel\Cashier\Cashier;
+use App\Models\Client;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,9 +15,6 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         view()->composer('*',function($view) {
-            // $getAllBlogCategory = BlogCategory::orderBy('id', 'ASC')->get();
-		    // $getAllService = Service::orderBy('id','ASC')->get();
-            // $view->with(compact('getAllBlogCategory','getAllService'));
         });
     }
 
@@ -26,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Cashier::useCustomerModel(Client::class);
         try {
             Storage::extend('google', function ($app, $config) {
                 $options = [];

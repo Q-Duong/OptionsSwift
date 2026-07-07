@@ -26,22 +26,21 @@
         $isTrial = false;
         $daysLeft = 0;
 
-        // Nếu biến $user chưa được Controller truyền ra, thì lấy từ Auth
         $currentUser = $user ?? Auth::guard('client')->user();
 
-        if ($currentUser && $currentUser->expires_at) {
-            // 1. Logic kiểm tra Trial (khoảng cách tạo và hết hạn <= 8 ngày)
-            if ($currentUser->created_at->diffInDays($currentUser->expires_at) <= 8) {
+        if ($currentUser) {
+            $subscription = $currentUser->subscription('default');
+            
+            if ($subscription && $subscription->onTrial()) {
                 $isTrial = true;
+            
+                $diff = now()->diffInDays($subscription->trial_ends_at, false);
+                $daysLeft = $diff < 0 ? 0 : $diff + 1;
             }
-
-            // 2. Tính số ngày còn lại để hiển thị cho nút Upgrade
-            // (Chỉ cần tính 1 lần duy nhất ở đây)
-            $daysLeft = \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($currentUser->expires_at), false);
-            $daysLeft = $daysLeft < 0 ? 0 : $daysLeft + 1;
         }
     @endphp
-    @if (isset($isTrial) && $isTrial)
+    
+    @if ($isTrial)
         <div class="trial-upgrade-banner">
             <div class="banner-content">
                 <div class="banner-icon">⚡</div>
@@ -122,8 +121,7 @@
                     <div
                         style="padding: 40px; text-align: center; color: #ff4d4d; border: 1px dashed #ff4d4d; margin: 20px; border-radius: 8px;">
                         <strong>SYSTEM ALERT:</strong> <br><br>
-                        Vui lòng nhắc Admin tạo một khối HTML Widget với Identifier Key là
-                        <strong>market_scanner</strong> để hiển thị màn hình chính.
+                        <strong>Updating...</strong>
                     </div>
                 @endif
             </div>

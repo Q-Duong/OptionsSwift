@@ -7,6 +7,7 @@ use App\Http\Controllers\Client\ClientProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\Client\SubscriptionController;
+use App\Http\Controllers\Client\StripeWebhookController;
 use App\Http\Controllers\GammaController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,7 @@ use Illuminate\Support\Facades\Request;
 Route::get('/', [HomeController::class, 'index'])->name('home.index');
 
 // Route nhận tín hiệu thanh toán tự động (Webhook)
-Route::post('/webhook/payment', [SubscriptionController::class, 'paymentCallback'])->name('payment.webhook');
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook']);
 
 // ==========================================
 // KHU VỰC 1: CLIENT (KHÁCH HÀNG)
@@ -46,21 +47,63 @@ Route::middleware('guest:client')->group(function () {
 });
 
 // 1.2 Khách đã đăng nhập (Được phép xem giá & Mua hàng, chưa cần duyệt)
-Route::middleware(['auth:client'])->group(function () {
-    Route::get('/pricing', [SubscriptionController::class, 'pricing'])->name('client.pricing');
-    Route::post('/checkout', [SubscriptionController::class, 'processCheckout'])->name('client.checkout');
-    Route::get('/invoice/{order_code}', [SubscriptionController::class, 'showInvoice'])->name('client.invoice');
-    Route::post('/invoice/{order_code}/pay', [SubscriptionController::class, 'processMockPayment'])->name('client.invoice.pay');
-    Route::get('/payment/success', [SubscriptionController::class, 'paymentSuccess'])->name('client.payment.success');
-    Route::get('/profile', [ClientProfileController::class, 'profile'])->name('client.profile');
-    Route::post('/api/gamma-data', [GammaController::class, 'fetchGammaData'])->name('client.api.gamma');
-    Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
-});
+// =================================================================
+// LỚP 1: VÒNG NGOÀI (BẮT BUỘC ĐĂNG NHẬP + TÀI KHOẢN KHÔNG BỊ KHÓA)
+// =================================================================
+Route::middleware(['auth:client', 'client.banned'])->group(function () {
+    // --- KHU VỰC XÁC THỰC EMAIL ---
+    Route::prefix('email')->group(function () {
+        //Trang thông báo yêu cầu kiểm tra email
+        Route::get('/verify', function () {
+            return view('pages.client.auth.verify');
+        })->name('verification.notice');
 
-// 1.3 Khách VIP (Đã đóng tiền / Đã duyệt / Còn hạn) -> Được vào Terminal
-Route::middleware(['auth:client', 'client.approved'])->group(function () {
-    Route::get('/dashboard', [ClientAuthController::class, 'dashboard'])->name('dashboard');
-    Route::get('/secure-html/{key}', [ClientAuthController::class, 'serveSecureHtml'])->name('html.secure');
+        Route::get('/verify/{id}/{hash}', function (\Illuminate\Http\Request $request, $id, $hash) {
+            $client = \App\Models\Client::findOrFail($id);
+
+            // Kiểm tra xem link có hợp lệ không (chống fake link)
+            if (! hash_equals((string) $hash, sha1($client->getEmailForVerification()))) {
+                abort(403, 'The verification link is invalid or has expired.');
+            }
+
+            // Nếu đã xác thực rồi thì cho qua luôn
+            if ($client->hasVerifiedEmail()) {
+                return redirect()->route('client.checkout');
+            }
+
+            // Đánh dấu thành công và bắn Event
+            $client->markEmailAsVerified();
+            event(new \Illuminate\Auth\Events\Verified($client));
+
+            // Xác nhận xong đẩy thẳng sang trang thanh toán
+            return redirect()->route('client.checkout')->with('success', 'Email has been verified! Please proceed with payment.');
+        })->middleware('signed')->name('verification.verify');
+
+        //Nút bấm gửi lại email (nếu khách không nhận được)
+        Route::post('/verification-notification', function (\Illuminate\Http\Request $request) {
+            $request->user('client')->sendEmailVerificationNotification();
+            return back()->with('success', 'Email verification link has been sent. Please check your inbox.');
+        })->middleware('throttle:6,1')->name('verification.send');
+    });
+
+    // --- KHU VỰC TỰ DO (Khách chưa check mail / chưa có gói vẫn vào được) ---
+    Route::get('/pricing', [SubscriptionController::class, 'pricing'])->name('client.pricing');
+    Route::get('/profile', [ClientProfileController::class, 'profile'])->name('client.profile');
+    Route::post('/profile/cancel-subscription', [SubscriptionController::class, 'cancel'])->name('client.subscription.cancel');
+    Route::post('/subscription/resume', [SubscriptionController::class, 'resume'])->name('client.subscription.resume');
+    Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
+
+    // --- KHU VỰC CHỜ MUA HÀNG (Bắt buộc phải Check Email xong mới được quẹt thẻ) ---
+    Route::get('/checkout', [SubscriptionController::class, 'checkout'])->middleware('client.verified')->name('client.checkout');
+
+    // =================================================================
+    // LỚP 2: VÒNG TRONG - KHÁCH VIP (CÒN HẠN SỬ DỤNG / ĐANG DÙNG THỬ)
+    // =================================================================
+    Route::middleware(['client.approved'])->group(function () {
+        Route::get('/dashboard', [ClientAuthController::class, 'dashboard'])->name('dashboard');
+        Route::get('/secure-html/{key}', [ClientAuthController::class, 'serveSecureHtml'])->name('html.secure');
+        Route::post('/api/gamma-data', [GammaController::class, 'fetchGammaData'])->name('client.api.gamma');
+    });
 });
 
 
@@ -99,6 +142,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
     });
 });
+
 
 
 Route::get('/clear-cache', function () {

@@ -70,5 +70,7 @@ class Kernel extends HttpKernel
         'checkSchedule' => \App\Http\Middleware\CheckLoginSchedule::class,
         'checkRoleSchedule' => \App\Http\Middleware\CheckRoleSchedule::class,
         'client.approved' => \App\Http\Middleware\CheckClientApproval::class,
+        'client.banned' => \App\Http\Middleware\CheckBannedClient::class,
+        'client.verified' => \App\Http\Middleware\EnsureClientIsVerified::class,
     ];
 }

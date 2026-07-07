@@ -12,6 +12,6 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        'stripe/*', // Bỏ qua kiểm tra CSRF cho mọi request từ Stripe
     ];
 }

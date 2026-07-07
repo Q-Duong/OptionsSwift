@@ -12,9 +12,9 @@
     <div class="auth-card">
         <h2>Create an Account</h2>
 
-        <form action="{{ route('register.submit') }}" method="POST">
+        <form action="{{ route('register.submit') }}" method="POST" id="formRegister">
             @csrf
-            <input type="hidden" name="selected_plan" value="{{ request('plan') }}">
+            <input type="hidden" name="plan_type" value="{{ request('plan_type') }}">
             <div class="form-group">
                 <label>Full Name</label>
                 <input type="text" name="name" value="{{ old('name') }}" placeholder="e.g., John Doe" required>
@@ -59,7 +59,11 @@
                 </label>
             </div>
 
-            <button type="submit" class="btn-primary">Register</button>
+            {{-- <button type="submit" class="btn-primary">Register</button> --}}
+            <button type="submit" class="btn-neon-submit" id="btnRegister">
+                <span class="auth-spinner"></span>
+                <span class="btn-text">Register</span>
+            </button>
         </form>
 
         <div class="auth-links">

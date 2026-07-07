@@ -4,7 +4,8 @@
     @include('layouts.section.client.header')
 
     <section class="hero">
-        <img src="{{ asset('assets/images/banner/9866ebb2-c028-4440-84f4-bc72c7cef40e.jpeg') }}" alt="Trading Confidence Banner" class="banner-image">
+        <img src="{{ asset('assets/images/banner/9866ebb2-c028-4440-84f4-bc72c7cef40e.jpeg') }}"
+            alt="Trading Confidence Banner" class="banner-image">
     </section>
 
     <section class="extra-features">
@@ -28,91 +29,71 @@
         </div>
     </section>
 
-    <!-- ===================================== -->
-    <!-- PHẦN BẢNG GIÁ (PRICING SECTION) -->
-    <!-- ===================================== -->
     <section class="pricing-section">
         <div class="pricing-header">
             <h2>CHOOSE YOUR <span>PLAN</span></h2>
             <p>Select a premium plan to secure your access, or start your free trial below.</p>
-            @if(!Auth::guard('client')->check())
-                <a href="{{ route('register') }}" class="btn-trial">🚀 Start 7-Day Free Trial</a>
-            @endif
+            
+            @guest('client')
+                <a href="{{ route('register', ['trial' => 'true']) }}" class="btn-trial">
+                    Start 7-Day Free Trial
+                </a>
+            @else
+                @if (empty($currentPlanId))
+                    <form action="{{ route('client.checkout') }}" method="GET" class="form-pricing" style="display:inline;">
+                        <input type="hidden" name="plan_type" value=""> 
+                        <button type="submit" class="btn-trial" style="border:none; cursor:pointer;">
+                            <span class="auth-spinner"></span>
+                            <span class="btn-text">Start 7-Day Free Trial</span>
+                        </button>
+                    </form>
+                @endif
+            @endguest
         </div>
 
         <div class="pricing-container">
-            
-            <!-- GÓI 3 THÁNG -->
-            <div class="pricing-card">
-                <h3 class="plan-name">Quarterly Flow</h3>
-                <div class="plan-price">$120<span>/3 months</span></div>
-                <div class="price-breakdown">Just $40 per month</div>
-                <ul class="feature-list">
-                    <li>Live Option Flow Scanner</li>
-                    <li>Gamma Levels & Block Alerts</li>
-                    <li>Institutional Data Feed</li>
-                    <li>Option Chain Imbalance , Pressure $ GEX analysis</li>
-                    <li>Estimated Hedge Shares</li>
-                </ul>
-                @if(Auth::guard('client')->check())
-                    <form action="{{ route('client.checkout') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="plan_type" value="3_months">
-                        <button type="submit" class="btn-subscribe">Select Plan</button>
-                    </form>
-                @else
-                    <a href="{{ route('register') }}?plan=3_months" class="btn-subscribe">Select Plan</a>
-                @endif
-            </div>
-
-            <!-- GÓI 6 THÁNG (MOST POPULAR) -->
-            <div class="pricing-card popular">
-                <div class="popular-badge">Most Popular</div>
-                <h3 class="plan-name">Semi-Annual Flow</h3>
-                <div class="plan-price">$210<span>/6 months</span></div>
-                <div class="price-breakdown">Save 12% - Just $35 per month</div>
-                <ul class="feature-list">
-                    <li>Live Option Flow Scanner</li>
-                    <li>Gamma Levels & Block Alerts</li>
-                    <li>Institutional Data Feed</li>
-                    <li>Option Chain Imbalance , Pressure $ GEX analysis</li>
-                    <li>Estimated Hedge Shares</li>
-                </ul>
-                @if(Auth::guard('client')->check())
-                    <form action="{{ route('client.checkout') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="plan_type" value="6_months">
-                        <button type="submit" class="btn-subscribe">Subscribe Now</button>
-                    </form>
-                @else
-                    <a href="{{ route('register') }}?plan=6_months" class="btn-subscribe">Subscribe Now</a>
-                @endif
-            </div>
-
-            <!-- GÓI 12 THÁNG -->
-            <div class="pricing-card">
-                <h3 class="plan-name">Annual Flow</h3>
-                <div class="plan-price">$360<span>/12 months</span></div>
-                <div class="price-breakdown">Save 25% - Just $30 per month</div>
-                <ul class="feature-list">
-                    <li>Live Option Flow Scanner</li>
-                    <li>Gamma Levels & Block Alerts</li>
-                    <li>Institutional Data Feed</li>
-                    <li>Option Chain Imbalance , Pressure $ GEX analysis</li>
-                    <li>Estimated Hedge Shares</li>
-                </ul>
-                @if(Auth::guard('client')->check())
-                    <form action="{{ route('client.checkout') }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="plan_type" value="12_months">
-                        <button type="submit" class="btn-subscribe">Select Plan</button>
-                    </form>
-                @else
-                    <a href="{{ route('register') }}?plan=12_months" class="btn-subscribe">Select Plan</a>
-                @endif
-            </div>
-
+            @foreach ($plans as $plan)
+                <div class="pricing-card {{ isset($plan['popular']) ? 'popular' : '' }}">
+                    @if (isset($plan['popular']))
+                        <div class="popular-badge">Most Popular</div>
+                    @endif
+        
+                    <h3 class="plan-name">{{ $plan['name'] }}</h3>
+                    <div class="plan-price">
+                        {{ $plan['price'] }}<span>/{{ str_replace(' ', '', $plan['name'] == 'Quarterly Flow' ? '3 months' : ($plan['name'] == 'Semi-Annual Flow' ? '6 months' : '12 months')) }}</span>
+                    </div>
+                    <div class="price-breakdown">{{ $plan['breakdown'] }}</div>
+        
+                    <ul class="feature-list">
+                        @foreach ($features as $feature)
+                            <li>{{ $feature }}</li>
+                        @endforeach
+                    </ul>
+        
+                    @if (isset($currentPlanId) && $plan['id'] === $currentPlanId)
+                        <button class="btn-subscribe" disabled
+                            style="background: #222; color: #555; cursor: not-allowed; opacity: 0.7; width: 100%; padding: 16px; border-radius: 15px; border: none; font-weight: bold;">
+                            CURRENT PLAN
+                        </button>
+                    @else
+                        @if (Auth::guard('client')->check())
+                            <form action="{{ route('client.checkout') }}" method="GET" class="form-pricing">
+                                <input type="hidden" name="plan_type" value="{{ $plan['id'] }}">
+                                <button type="submit" class="btn-pricing-neon">
+                                    <span class="auth-spinner"></span>
+                                    <span class="btn-text">{{ isset($currentPlanId) ? 'SWITCH TO THIS PLAN' : 'SELECT PLAN' }}</span>
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('register', ['plan_type' => $plan['id']]) }}" class="btn-pricing-neon" style="text-decoration: none;">
+                                <span class="btn-text">SELECT PLAN</span>
+                            </a>
+                        @endif
+                    @endif
+                </div>
+            @endforeach
         </div>
+
     </section>
 @endsection
 

@@ -42,7 +42,7 @@
 .pricing-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 40px 30px;
   width: 350px;
   display: flex;
@@ -158,7 +158,7 @@
   color: #fff;
   padding: 15px;
   width: 100%;
-  border-radius: 6px;
+  border-radius: 15px;
   font-size: 1rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -203,5 +203,69 @@
 
   .pricing-card.popular:hover {
     transform: translateY(-10px);
+  }
+}
+
+/* Thiết kế nút bấm Xanh Neon rực rỡ dành riêng cho Pricing */
+.btn-pricing-neon {
+  background: #59ea1e;
+  color: #000000;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 15px;
+  font-weight: 900;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(89, 234, 30, 0.2);
+}
+
+.btn-pricing-neon:hover:not(.is-loading) {
+  background: #4bd218;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(89, 234, 30, 0.5);
+}
+
+.btn-pricing-neon:active:not(.is-loading) {
+  transform: translateY(1px);
+}
+
+/* Trạng thái Loading */
+.btn-pricing-neon.is-loading {
+  pointer-events: none;
+  background: rgba(89, 234, 30, 0.5);
+  color: rgba(0, 0, 0, 0.7);
+  box-shadow: none;
+}
+
+/* Vòng xoay Spinner (nếu bác chưa để ở layout chung thì copy đoạn này vào) */
+.auth-spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin-auth 0.75s linear infinite;
+}
+
+.btn-pricing-neon.is-loading .auth-spinner {
+  display: block;
+}
+
+@keyframes spin-auth {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
   }
 }
