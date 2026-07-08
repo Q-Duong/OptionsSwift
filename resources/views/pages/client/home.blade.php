@@ -95,6 +95,8 @@
         </div>
 
     </section>
+
+    @include('layouts.section.client.footer')
 @endsection
 
 @push('js')

@@ -32,4 +32,6 @@
         </section>
     </div>
 </div>
+
+@include('layouts.section.client.footer')
 @endsection

@@ -37,6 +37,15 @@ Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])
 Route::get('/terms', function () {
     return view('pages.client.terms');
 })->name('terms');
+
+Route::get('/about', function () {
+    return view('pages.client.about');
+})->name('about');
+
+Route::get('/contact', function () {
+    return view('pages.client.contact');
+})->name('contact');
+
 // 1.1 Khách vãng lai (Guest)
 Route::middleware('guest:client')->group(function () {
     Route::get('/login', [ClientAuthController::class, 'showLoginForm'])->name('login');
