@@ -1,12 +1,21 @@
-.main-section {
+:root {
+  --primary-color: #59ea1e;
+  --bg-color: #0b0f19;
+  --card-bg: #111827;
+  --border-color: #1f2937;
+  --text-main: #f8fafc;
+  --text-muted: #9ca3af;
+}
+
+body {
   background-color: var(--bg-color);
   color: var(--text-main);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
+}
+
+.manage-plan-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 60px 20px;
 }
 
 .header-text {
@@ -19,6 +28,7 @@
   font-style: italic;
   letter-spacing: 1px;
   margin-bottom: 10px;
+  font-weight: 800;
 }
 
 .header-text h1 span {
@@ -30,162 +40,28 @@
   font-size: 1.1rem;
 }
 
-.pricing-container {
-  display: flex;
-  gap: 30px;
-  max-width: 1200px;
-  width: 100%;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.pricing-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 20px;
-  padding: 40px 30px;
-  width: 350px;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease, border-color 0.3s ease;
-  position: relative;
-}
-
-.pricing-card:hover {
-  transform: translateY(-10px);
-  border-color: rgba(89, 234, 30, 0.5);
-}
-
-.pricing-card.popular {
-  border-color: var(--primary-color);
-  box-shadow: 0 10px 30px rgba(89, 234, 30, 0.1);
-  transform: scale(1.05);
-  z-index: 10;
-}
-
-.pricing-card.popular:hover {
-  transform: scale(1.05) translateY(-10px);
-}
-
-.popular-badge {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--primary-color);
-  color: #000;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 5px 15px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.plan-name {
-  font-size: 1.2rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-muted);
-  margin-bottom: 5px;
-}
-
-.pricing-card.popular .plan-name {
-  color: var(--primary-color);
-}
-
-.plan-price {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: baseline;
-}
-
-.plan-price span {
-  font-size: 1rem;
-  color: var(--text-muted);
-  font-weight: normal;
-  margin-left: 5px;
-}
-
-.price-breakdown {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 25px;
-  font-style: italic;
-}
-
-.feature-list {
-  list-style: none;
-  margin-bottom: 40px;
-  flex: 1;
-  padding: 0;
-}
-
-.feature-list li {
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  font-size: 0.95rem;
-  color: #e2ebe8;
-}
-
-.feature-list li::before {
-  content: '✓';
-  color: var(--primary-color);
-  font-weight: bold;
-  margin-right: 10px;
-  font-size: 1.2rem;
-}
-
-.feature-list li.disabled {
-  color: var(--text-muted);
-  text-decoration: line-through;
-}
-
-.feature-list li.disabled::before {
-  content: '✕';
-  color: #ff4d4d;
-}
-
-.btn-subscribe {
-  display: block;
-  text-align: center;
-  text-decoration: none;
-  background: transparent;
-  border: 2px solid var(--border-color);
-  color: #fff;
-  padding: 15px;
-  width: 100%;
-  border-radius: 15px;
-  font-size: 1rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
+.btn-free-trial {
+  display: inline-block; 
+  background: var(--primary-color); 
+  color: #000; 
+  padding: 12px 30px; 
+  border-radius: 30px; 
+  text-decoration: none; 
+  font-weight: bold; 
+  font-size: 16px; 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  box-shadow: 0 5px 20px rgba(89, 234, 30, 0.3); 
   transition: 0.3s;
 }
 
-.btn-subscribe:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: #fff;
+.btn-free-trial:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(89, 234, 30, 0.5);
 }
 
-.pricing-card.popular .btn-subscribe {
-  background: var(--primary-color);
-  color: #000;
-  border: none;
-}
-
-.pricing-card.popular .btn-subscribe:hover {
-  background: #4cd115;
-  box-shadow: 0 0 15px rgba(89, 234, 30, 0.4);
-}
-
+/* Thông báo lỗi / cảnh báo */
 .alert-box {
-  max-width: 1200px;
-  width: 100%;
   background: rgba(255, 77, 77, 0.1);
   border: 1px solid rgba(255, 77, 77, 0.3);
   padding: 15px 20px;
@@ -194,27 +70,170 @@
   margin-bottom: 30px;
   text-align: center;
 }
-
-@media (max-width: 900px) {
-  .pricing-card.popular {
-    transform: scale(1);
-    z-index: 1;
-  }
-
-  .pricing-card.popular:hover {
-    transform: translateY(-10px);
-  }
+.alert-warning {
+  background: rgba(255, 193, 7, 0.1);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #ffc107;
 }
 
-/* Thiết kế nút bấm Xanh Neon rực rỡ dành riêng cho Pricing */
+/* Tiêu đề từng khu vực */
+.plan-section {
+  margin-bottom: 40px;
+}
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: left;
+  text-transform: uppercase;
+  font-style: normal;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+/* =========================================
+   GÓI ĐANG DÙNG (CURRENT PLAN)
+   ========================================= */
+.plan-card-active {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.plan-card-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-color);
+  box-shadow: 0 0 12px rgba(89, 234, 30, 0.6);
+}
+
+.plan-info h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 6px 0;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.plan-info p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin: 0 0 12px 0;
+  font-style: italic;
+}
+
+.badge-active {
+  background: rgba(89, 234, 30, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(89, 234, 30, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-cancel {
+  background: rgba(220, 38, 38, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* =========================================
+   CÁC GÓI KHÁC (AVAILABLE PLANS)
+   ========================================= */
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-card-option {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  transition: all 0.3s ease;
+}
+
+.plan-card-option:hover {
+  border-color: rgba(89, 234, 30, 0.5);
+  transform: translateY(-3px);
+  background: rgba(30, 41, 59, 0.4);
+}
+
+.plan-card-option.is-popular {
+  border-color: rgba(89, 234, 30, 0.4);
+  background: rgba(17, 24, 39, 0.8);
+}
+
+.badge-recommended {
+  background: var(--primary-color);
+  color: #000;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-left: 12px;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
+/* =========================================
+   GIÁ TIỀN & NÚT BẤM
+   ========================================= */
+.plan-price-block {
+  text-align: right;
+  min-width: 200px;
+}
+
+.plan-price-block .price {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+}
+
+.plan-price-block .duration {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin-left: 6px;
+}
+
 .btn-pricing-neon {
-  background: #59ea1e;
+  background: var(--primary-color);
   color: #000000;
   border: none;
-  padding: 16px 32px;
-  border-radius: 15px;
+  padding: 12px 24px;
+  border-radius: 12px;
   font-weight: 900;
-  font-size: 14px;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 1px;
   width: 100%;
@@ -229,15 +248,10 @@
 
 .btn-pricing-neon:hover:not(.is-loading) {
   background: #4bd218;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(89, 234, 30, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(89, 234, 30, 0.4);
 }
 
-.btn-pricing-neon:active:not(.is-loading) {
-  transform: translateY(1px);
-}
-
-/* Trạng thái Loading */
 .btn-pricing-neon.is-loading {
   pointer-events: none;
   background: rgba(89, 234, 30, 0.5);
@@ -245,7 +259,68 @@
   box-shadow: none;
 }
 
-/* Vòng xoay Spinner (nếu bác chưa để ở layout chung thì copy đoạn này vào) */
+.btn-text-danger {
+  color: #ef4444;
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.3s;
+}
+
+.btn-text-danger:hover {
+  color: #dc2626;
+  text-decoration: underline;
+}
+
+/* =========================================
+   DROPDOWN TÍNH NĂNG (FEATURE LIST)
+   ========================================= */
+.feature-dropdown {
+  margin-top: 15px;
+}
+
+.feature-dropdown summary {
+  color: #60a5fa;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s;
+  outline: none;
+}
+
+.feature-dropdown summary:hover {
+  color: #93c5fd;
+}
+
+.feature-list-small {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0 0;
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+.feature-list-small li {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.feature-list-small li::before {
+  content: '✓';
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 1rem;
+}
+
+/* Vòng xoay Loading */
 .auth-spinner {
   display: none;
   width: 16px;
@@ -261,11 +336,209 @@
 }
 
 @keyframes spin-auth {
-  from {
-    transform: rotate(0deg);
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .plan-card-active, .plan-card-option {
+    flex-direction: column;
+  }
+  .plan-price-block {
+    text-align: left;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .plan-price-block .price {
+    justify-content: flex-start;
+  }
+}
+
+/* =========================================
+   TAGS: RECOMMENDED, UPGRADE, DOWNGRADE
+   ========================================= */
+   .badge-tag {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    margin-left: 10px;
+    font-weight: 800;
+    vertical-align: middle;
+    display: inline-block;
+    letter-spacing: 0.5px;
+  }
+  
+  .badge-recommended {
+    background: var(--primary-color);
+    color: #000;
+  }
+  
+  .badge-upgrade {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .badge-downgrade {
+    background: rgba(107, 114, 128, 0.15);
+    color: #9ca3af;
+    border: 1px solid rgba(107, 114, 128, 0.3);
+  }
+  
+  /* =========================================
+     NÚT BẤM HẠ CẤP (OUTLINE)
+     ========================================= */
+  .btn-pricing-outline {
+    background: transparent;
+    color: #cbd5e1;
+    border: 1px solid #475569;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-pricing-outline:hover:not(.is-loading) {
+    border-color: #94a3b8;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .btn-pricing-outline.is-loading {
+    pointer-events: none;
+    opacity: 0.6;
   }
 
-  to {
-    transform: rotate(360deg);
-  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.btn-loading-state {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+
+
+/* Nền đen mờ phủ toàn màn hình */
+.glass-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Khi modal kích hoạt */
+.glass-modal-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Hộp Modal */
+.glass-modal-content {
+  background: #111315;
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 450px;
+  padding: 30px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.glass-modal-overlay.is-active .glass-modal-content {
+  transform: translateY(0);
+}
+
+/* Các thành phần chữ */
+.modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 15px 25px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.icon-warning {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.modal-header h2 {
+  color: #fff;
+  font-size: 20px;
+  margin: 0;
+}
+
+.modal-body p {
+  color: #a0aab2;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.loss-list {
+  color: #ff4d4d;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.8;
+}
+
+.sub-text {
+  font-size: 14px !important;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* Layout Nút */
+.modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Nút Hủy (Nút phụ) */
+.btn-ghost-danger {
+  background: transparent;
+  color: #888;
+  border: none;
+  padding: 12px;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-ghost-danger:hover:not(.is-loading) {
+  color: #ff4d4d;
 }

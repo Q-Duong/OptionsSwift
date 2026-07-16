@@ -13,10 +13,5 @@
             
         <a href="{{ route('admin.clients.index') }}"
             class="tab-link {{ request()->routeIs('admin.clients.index') ? 'active' : '' }}">All Clients</a>
-
-        <a href="{{ route('admin.clients.pending') }}"
-            class="tab-link {{ request()->routeIs('admin.clients.pending') ? 'active' : '' }}">Approvals
-            
-        </a>
     </div>
 </header>

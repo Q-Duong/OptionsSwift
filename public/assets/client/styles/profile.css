@@ -25,6 +25,7 @@
 .card-title {
     color: #fff;
     font-size: 1.2rem;
+    font-weight: 600;
     margin-bottom: 20px;
     padding-bottom: 15px;
     border-bottom: 1px solid #1a242c;
@@ -87,8 +88,7 @@
     text-align: left;
     padding: 12px 15px;
     color: #a0aab2;
-    font-size: 13px;
-    text-transform: uppercase;
+    font-size: 14px;
     border-bottom: 1px solid #1a242c;
 }
 
@@ -115,6 +115,16 @@
 }
 
 .bill-paid {
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    background: rgba(34, 197, 94, 0.1);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.bill-credited {
     background: rgba(89, 234, 30, 0.1);
     color: #59ea1e;
 }
@@ -360,149 +370,63 @@
     }
 }
 
-/* Nền đen mờ phủ toàn màn hình */
-.glass-modal-overlay {
-    position: fixed;
+.status-vip {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 193, 7, 0.15) !important;
+    color: #ffc107 !important;
+    border: 1px solid #ffc107 !important;
+    font-weight: bold;
+    letter-spacing: 1px;
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.3);
+    z-index: 1;
+}
+
+/* Tạo tia sáng xiên 25 độ */
+.status-vip::before {
+    content: '';
+    position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: -100%;
+    width: 50%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
+    background: linear-gradient(to right, rgba(255, 193, 7, 0) 0%, rgba(255, 193, 7, 0.5) 50%, rgba(255, 193, 7, 0) 100%);
+    transform: skewX(-25deg);
+    animation: vipShimmer 3s infinite;
+    z-index: -1;
 }
 
-/* Khi modal kích hoạt */
-.glass-modal-overlay.is-active {
-    opacity: 1;
-    visibility: visible;
+@keyframes vipShimmer {
+    0% {
+        left: -100%;
+    }
+
+    20% {
+        left: 200%;
+    }
+
+    100% {
+        left: 200%;
+    }
+
+    /* Dừng 1 nhịp rồi mới lướt tiếp */
 }
 
-/* Hộp Modal */
-.glass-modal-content {
-    background: #111315;
-    border: 1px solid rgba(255, 77, 77, 0.2);
-    border-radius: 20px;
-    width: 100%;
-    max-width: 450px;
-    padding: 30px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-}
-
-.glass-modal-overlay.is-active .glass-modal-content {
-    transform: translateY(0);
-}
-
-/* Các thành phần chữ */
-.modal-header {
-    text-align: center;
-    margin-bottom: 20px;
-    padding: 15px 25px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.icon-warning {
-    font-size: 40px;
-    margin-bottom: 10px;
-}
-
-.modal-header h2 {
-    color: #fff;
-    font-size: 20px;
-    margin: 0;
-}
-
-.modal-body p {
-    color: #a0aab2;
-    font-size: 14px;
-    margin-bottom: 15px;
-}
-
-.loss-list {
-    color: #ff4d4d;
-    list-style: none;
-    padding: 0;
-    margin-bottom: 20px;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.8;
-}
-
-.sub-text {
-    font-size: 14px !important;
-    opacity: 0.7;
-    font-style: italic;
-}
-
-/* Layout Nút */
-.modal-footer {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-/* Nút Hủy (Nút phụ) */
-.btn-ghost-danger {
-    background: transparent;
-    color: #888;
-    border: none;
-    padding: 12px;
-    font-size: 14px;
-    text-decoration: underline;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.btn-ghost-danger:hover:not(.is-loading) {
-    color: #ff4d4d;
-}
-
-/* Trạng thái loading của nút Hủy */
-.btn-ghost-danger.is-loading {
-    pointer-events: none;
-    opacity: 0.5;
-    text-decoration: none;
-}
-
-.btn-cancel-danger {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #ff4d4d;
-    background: transparent;
-    color: #ff4d4d;
-    border-radius: 15px;
+/* HIỆU ỨNG TEXT BÊN TRONG (PHÁT SÁNG NHỊP NHÀNG) */
+.vip-text-glow {
+    color: #ffc107;
     font-weight: bold;
-    cursor: pointer;
+    margin-bottom: 4px;
+    font-size: 12px;
+    animation: textPulse 2s infinite alternate;
 }
 
-.btn-resume-subscription {
-    width: 100%;
-    padding: 15px;
-    border: 1px solid #00ff66;
-    background: rgba(0, 255, 102, 0.1);
-    color: #00ff66;
-    border-radius: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
+@keyframes textPulse {
+    0% {
+        text-shadow: 0 0 4px rgba(255, 193, 7, 0.2);
+    }
 
-/* style="display: none; width: 16px; height: 16px; border: 2px solid rgba(0,255,102,0.3); border-top-color: #00ff66; border-radius: 50%; animation: spin 1s linear infinite;" */
+    100% {
+        text-shadow: 0 0 15px rgba(255, 193, 7, 0.8);
+    }
+}

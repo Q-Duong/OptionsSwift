@@ -10,25 +10,34 @@ class CheckClientApproval
 {
     public function handle(Request $request, Closure $next)
     {
-        // 1. Kiểm tra xem khách có đăng nhập chưa
+        // ==========================================
+        // LỚP 1: KIỂM TRA ĐĂNG NHẬP
+        // ==========================================
         if (!Auth::guard('client')->check()) {
             return redirect()->route('login');
         }
 
-        // Ép kiểu để VS Code không gạch đỏ (như bài học hôm trước)
         /** @var \App\Models\Client $user */
         $user = Auth::guard('client')->user();
 
-        // 2. Xử lý "Race Condition" của Stripe
+        // ==========================================
+        // 2. ĐẶC QUYỀN VIP (Ngoại lệ không thu tiền)
+        // ==========================================
+        // Vượt qua kiểm tra thanh toán ngay lập tức nếu là tài khoản VIP
+        if ($user->is_vip) {
+            return $next($request);
+        }
+
+        // ==========================================
+        // 3. XỬ LÝ KHÁCH HÀNG BÌNH THƯỜNG (STRIPE)
+        // ==========================================
+        // Xử lý độ trễ (Race Condition) khi trình duyệt về đích trước Webhook
         $isJustRedirectedFromStripe = $request->has('trial') || $request->has('payment');
+        
 
-        // Hàm subscribed('default') là siêu năng lực của Cashier. Nó trả về TRUE nếu:
-        // 1. Đang trong 7 ngày dùng thử (trialing)
-        // 2. Đang dùng gói trả phí bình thường (active)
-        // 3. Đã bấm hủy nhưng vẫn còn hạn sử dụng (grace period)
+        // Hàm subscribed('default') của Cashier lo toàn bộ logic:
+        // Đang dùng thử / Đang trả phí / Đã hủy nhưng còn Grace Period
         if (!$user->subscribed('default') && !$isJustRedirectedFromStripe) {
-
-            // Xóa dòng update status = 'expired' đi vì Stripe tự lo việc đó
             return redirect()->route('client.pricing')
                 ->with('warning', 'Your access has expired or no active subscription found. Please choose a plan to continue.');
         }

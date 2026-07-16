@@ -10,7 +10,7 @@ function openNewFlowWindow(ticker, expiry) {
         targetUrl += "&expiry=" + expiry;
     }
 
-    window.open(targetUrl, '_blank');
+    window.open(targetUrl, "_blank");
 
     const dropdownBtnText = document.getElementById("dropdownBtnText");
     if (dropdownBtnText) dropdownBtnText.innerHTML = `🔍 ${cleanTicker} Flow`;
@@ -182,40 +182,48 @@ document.addEventListener("DOMContentLoaded", function () {
             modal.classList.add("is-active");
         });
 
-        btnKeep.addEventListener("click", function () {
-            modal.classList.remove("is-active");
-        });
+        if (btnKeep) {
+            btnKeep.addEventListener("click", function () {
+                modal.classList.remove("is-active");
+            });
+        }
 
-        btnConfirm.addEventListener("click", function () {
-            this.classList.add("is-loading");
-            const textSpan = this.querySelector(".btn-text");
-            const spinner = document.getElementById("spinnerCancel");
+        if (btnConfirm) {
+            btnConfirm.addEventListener("click", function () {
+                this.classList.add("is-loading");
+                const textSpan = this.querySelector(".btn-text");
+                const spinner = document.getElementById("spinnerCancel");
 
-            if (textSpan) textSpan.innerText = "Canceling...";
-            if (spinner) spinner.style.display = "block";
-            formCancel.submit();
-        });
+                if (textSpan) textSpan.innerText = "Canceling...";
+                if (spinner) spinner.style.display = "block";
+                formCancel.submit();
+            });
+        }
+    } else {
+        console.warn("⚠️ Thiếu HTML của Modal Cancel trên trang này!");
     }
 
-    const formResume = document.getElementById('formResumeSubscription');
-    const btnResume = document.getElementById('btnResumeSubscription');
+    // --- KHỐI XỬ LÝ RESUME ---
+    const formResume = document.getElementById("formResumeSubscription");
+    const btnResume = document.getElementById("btnResumeSubscription");
 
     if (formResume && btnResume) {
-        formResume.addEventListener('submit', function (event) {
+        formResume.addEventListener("submit", function (event) {
             const confirmResume = confirm("Are you sure you want to resume your subscription? Your automatic billing cycle will be reactivated.");
- 
+
             if (!confirmResume) {
                 event.preventDefault();
                 return;
             }
-            btnResume.style.pointerEvents = 'none';
-            btnResume.style.opacity = '0.7';
             
-            const textSpan = btnResume.querySelector('.btn-text');
-            const spinner = document.getElementById('spinnerResume');
-            
-            if (textSpan) textSpan.innerText = 'Resuming...';
-            if (spinner) spinner.style.display = 'block';
+            btnResume.style.pointerEvents = "none";
+            btnResume.style.opacity = "0.7";
+
+            const textSpan = btnResume.querySelector(".btn-text");
+            const spinner = document.getElementById("spinnerResume");
+
+            if (textSpan) textSpan.innerText = "Resuming...";
+            if (spinner) spinner.style.display = "block";
         });
     }
 });

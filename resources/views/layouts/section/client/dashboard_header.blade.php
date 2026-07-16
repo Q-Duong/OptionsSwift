@@ -8,23 +8,58 @@
     @php
         $user = Auth::guard('client')->user();
         
-        $isTrial = false;
-        $isPro = false;
-        $daysLeft = 0;
+        // Cấu hình mặc định cho thẻ Badge
+        $badgeText = 'FREE TIER';
+        $badgeStyle = 'background: rgba(150, 150, 150, 0.15); color: #a0aab2; border: 1px solid #a0aab2;';
+        $badgeClass = '';
 
-        // Logic check trạng thái gói chuẩn Stripe
         if ($user) {
+            $isVip = $user->is_vip ?? false;
             $subscription = $user->subscription('default');
-            
-            // Nếu có gói và gói đó đang hợp lệ (active, trialing, hoặc on grace period)
-            if ($subscription && $subscription->valid()) {
-                if ($subscription->onTrial()) {
-                    $isTrial = true;
-                    $diff = now()->diffInDays($subscription->trial_ends_at, false);
-                    $daysLeft = $diff < 0 ? 0 : $diff + 1; 
-                } else {
-                    $isPro = true; // Gói trả phí đang hoạt động
+
+            // 1. ƯU TIÊN KIỂM TRA TRẠNG THÁI VIP TRƯỚC TIÊN
+            if ($isVip) {
+                $badgeText = 'LIFETIME VIP';
+                $badgeStyle = 'background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid #ffc107;';
+                $badgeClass = 'header-vip-badge'; 
+            } 
+            // 2. KIỂM TRA CÁC GÓI CƯỚC STRIPE NẾU KHÔNG PHẢI VIP
+            elseif ($subscription && $subscription->valid()) {
+                $isOnTrial = $subscription->onTrial();
+                $isCancelled = $subscription->canceled();
+                $isOnGracePeriod = $subscription->onGracePeriod();
+                $isActive = $subscription->active();
+
+                $annualPrice = config('services.stripe.price_annual');
+                $semiPrice = config('services.stripe.price_semi_annual');
+                $quarterlyPrice = config('services.stripe.price_quarterly');
+
+                // Lấy tên gói cước chính xác
+                $planName = 'PRO PLAN';
+                if ($annualPrice !== '' && $subscription->hasPrice($annualPrice)) {
+                    $planName = 'ANNUAL FLOW';
+                } elseif ($semiPrice !== '' && $subscription->hasPrice($semiPrice)) {
+                    $planName = 'SEMI-ANNUAL FLOW';
+                } elseif ($quarterlyPrice !== '' && $subscription->hasPrice($quarterlyPrice)) {
+                    $planName = 'QUARTERLY FLOW';
                 }
+
+                // Xét ưu tiên hiển thị trạng thái
+                if ($isCancelled && $isOnGracePeriod) {
+                    $badgeText = 'CANCELING SOON';
+                    $badgeStyle = 'background: rgba(255, 152, 0, 0.15); color: #ff9800; border: 1px solid #ff9800;';
+                } elseif ($isOnTrial) {
+                    $badgeText = 'FREE TRIAL';
+                    $badgeStyle = 'background: rgba(77, 184, 255, 0.15); color: #4db8ff; border: 1px solid #4db8ff;';
+                } elseif ($isActive) {
+                    $badgeText = strtoupper($planName); // In hoa tên gói (VD: QUARTERLY FLOW)
+                    $badgeStyle = 'background: rgba(89, 234, 30, 0.15); color: #59ea1e; border: 1px solid #59ea1e;';
+                }
+            } 
+            // 3. NẾU ĐÃ HẾT HẠN HOẶC KHÔNG CÓ GÓI
+            elseif (!$isVip && $user->status === 'active' && !$subscription) {
+                $badgeText = 'NO ACTIVE PLAN';
+                $badgeStyle = 'background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border: 1px solid #ff4d4d;';
             }
         }
     @endphp
@@ -36,46 +71,28 @@
             </button>
 
             <div class="dropdown-menu" id="userDropdownMenu" style="min-width: 220px;">
-                <div class="user-info-header" style="overflow: hidden;">
+                <div class="user-info-header" style="overflow: hidden; text-align: center; padding-bottom: 5px;">
 
-                    {{-- HIỂN THỊ THẺ TAG DỰA TRÊN 3 TRẠNG THÁI --}}
-                    @if ($isTrial)
-                        <span class="role-badge badge-client"
-                            style="background: rgba(77, 184, 255, 0.15); color: #4db8ff; border: 1px solid #4db8ff; padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: inline-block;">
-                            FREE TRIAL
-                        </span>
-                    @elseif ($isPro)
-                        <span class="role-badge badge-client"
-                            style="background: rgba(89, 234, 30, 0.15); color: #59ea1e; border: 1px solid #59ea1e; padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: inline-block;">
-                            PRO PLAN
-                        </span>
-                    @else
-                        <span class="role-badge badge-client"
-                            style="background: rgba(150, 150, 150, 0.15); color: #a0aab2; border: 1px solid #a0aab2; padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: inline-block;">
-                            FREE TIER
-                        </span>
-                    @endif
+                    <span class="role-badge badge-client {{ $badgeClass }}"
+                        style="{{ $badgeStyle }} padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: inline-block;">
+                        {{ $badgeText }}
+                    </span>
 
                     <p class="user-email"
-                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-top: 10px; margin-bottom: 5px;">
+                        style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; margin-top: 10px; margin-bottom: 5px; color: #a0aab2; font-size: 13px;">
                         {{ $user ? $user->email : '' }}
                     </p>
                 </div>
 
                 <div class="dropdown-divider"></div>
 
-                <a href="{{ route('client.profile') }}" class="dropdown-item"
-                    style="display: block; color: #e2ebe8; text-decoration: none; padding: 10px 15px; transition: 0.2s;">
+                <a href="{{ route('client.profile') }}" class="dropdown-item {{ request()->routeIs('client.profile') ? 'active' : '' }}">
                     My Account & Billing
                 </a>
 
-                {{-- NÚT UPGRADE HIỆN CHO CẢ NGƯỜI CHƯA CÓ GÓI VÀ NGƯỜI ĐANG DÙNG THỬ --}}
-                @if (!$isPro)
-                    <a href="{{ route('client.pricing') }}" class="dropdown-item"
-                        style="display: block; padding: 10px 15px; color: #59ea1e; text-decoration: none; font-weight: bold; background: rgba(89, 234, 30, 0.05); border-left: 3px solid #59ea1e; margin-top: 5px;">
-                         Upgrade To Pro @if($isTrial) ({{ $daysLeft }} days left) @endif
-                    </a>
-                @endif
+                <a href="{{ route('client.pricing') }}" class="dropdown-item {{ request()->routeIs('client.pricing') ? 'active' : '' }}">
+                    Manage Plan
+                </a>
 
                 <div class="dropdown-divider"></div>
 

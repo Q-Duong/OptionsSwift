@@ -15,45 +15,51 @@ class StripeWebhookController extends CashierController
      */
     protected function handleInvoicePaymentSucceeded(array $payload)
     {
-        $client = $this->getUserByStripeId($payload['data']['object']['customer']);
-        $amountPaid = $payload['data']['object']['amount_paid'] / 100;
+        // 1. Lấy thông tin hóa đơn từ Stripe
+        $invoice = $payload['data']['object'];
+        $stripeInvoiceId = $invoice['id']; // ID độc nhất của hóa đơn (VD: in_1ABC234...)
+        
+        // ==========================================
+        // CHỐT CHẶN VÀNG: KIỂM TRA TRÙNG LẶP (DUPLICATE)
+        // ==========================================
+        // Nếu mã hóa đơn này đã tồn tại trong DB -> Bỏ qua ngay lập tức để tránh đúp dòng
+        if (Order::where('order_code', $stripeInvoiceId)->exists()) {
+            \Illuminate\Support\Facades\Log::info("Bỏ qua Webhook: Hóa đơn {$stripeInvoiceId} đã được lưu trước đó.");
+            return parent::handleInvoicePaymentSucceeded($payload);
+        }
 
-        if ($client && $amountPaid > 0) {
+        $client = $this->getUserByStripeId($invoice['customer']);
+        $invoiceTotal = $invoice['total'] / 100;
+
+        // Chỉ lưu hóa đơn nếu khách hàng tồn tại và số tiền thanh toán thực sự > 0
+        if ($client && $invoiceTotal !== 0) {
             
-            // 1. LẤY TOÀN BỘ CÁC DÒNG TRONG HÓA ĐƠN
-            $lines = data_get($payload, 'data.object.lines.data', []);
-            $planName = 'Nâng cấp / Bù trừ gói cước'; // Tên mặc định dự phòng
+            $lines = data_get($invoice, 'lines.data', []);
+            $planName = 'Downgrade / Update Subscription';
 
-            // 2. LẶP ĐỂ TÌM TÊN GÓI CHÍNH XÁC
             foreach ($lines as $line) {
                 $desc = data_get($line, 'description', '');
-                
-                // Bỏ qua các dòng proration (bù trừ) của Stripe
-                if (!Str::contains($desc, ['Unused time', 'Remaining time'])) {
-                    
-                    // Có chữ '× ' thì cắt, không có thì lấy nguyên chuỗi
-                    $planName = Str::contains($desc, '× ') 
-                        ? trim(Str::after($desc, '× ')) 
+                if (!\Illuminate\Support\Str::contains($desc, ['Unused time', 'Remaining time', 'Proration'])) {
+                    $planName = \Illuminate\Support\Str::contains($desc, '× ') 
+                        ? trim(\Illuminate\Support\Str::after($desc, '× ')) 
                         : $desc;
-                    break; // Tìm thấy tên gói thật thì dừng vòng lặp luôn
+                    break;
                 }
             }
 
-            $orderCode = 'OS-' . strtoupper(Str::random(8));
-
-            // 3. Lưu lịch sử đơn hàng
-            \App\Models\Order::create([
-                'order_code' => $orderCode,
+            // Ghi sổ sách vào Database (Dùng chính Invoice ID của Stripe làm Order Code)
+            Order::create([
+                'order_code' => $stripeInvoiceId, 
                 'client_id'  => $client->id,
                 'plan_type'  => $planName,
-                'amount'     => $amountPaid,
-                'status'     => 'completed',
+                'amount'     => $invoiceTotal, 
+                'status'     => 'paid',
             ]);
 
-            \Illuminate\Support\Facades\Log::info("Thanh toán thành công: {$orderCode} | Gói: {$planName} - {$client->email}");
+            \Illuminate\Support\Facades\Log::info("Ghi nhận hóa đơn: {$stripeInvoiceId} | Gói: {$planName} | Khách: {$client->email}");
 
-            // 4. Gửi email
-            // SendPaymentReceiptJob::dispatch($client, $orderCode, $amountPaid)->onQueue('emails');
+            // Gửi email biên lai cho khách (Bác có thể mở comment dòng dưới nếu cần)
+            // SendPaymentReceiptJob::dispatch($client, $stripeInvoiceId, $amountPaid)->onQueue('emails');
         }
 
         return parent::handleInvoicePaymentSucceeded($payload);

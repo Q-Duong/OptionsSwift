@@ -28,20 +28,20 @@ class HomeController extends Controller
                 'name' => 'Quarterly Flow',
                 'price' => '$120',
                 'breakdown' => 'Just $40 per month',
-                'id' => env('STRIPE_PRICE_QUARTERLY'),
+                'id' => config('services.stripe.price_quarterly'),
             ],
             [
                 'name' => 'Semi-Annual Flow',
                 'price' => '$210',
                 'breakdown' => 'Save 12% - Just $35 per month',
-                'id' => env('STRIPE_PRICE_SEMI_ANNUAL'),
+                'id' => config('services.stripe.price_semi_annual'),
                 'popular' => true,
             ],
             [
                 'name' => 'Annual Flow',
                 'price' => '$360',
                 'breakdown' => 'Save 25% - Just $30 per month',
-                'id' => env('STRIPE_PRICE_ANNUAL'),
+                'id' => config('services.stripe.price_annual'),
             ],
         ];
 

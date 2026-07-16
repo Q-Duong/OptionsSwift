@@ -17,20 +17,20 @@ class SubscriptionController extends Controller
                 'name' => 'Quarterly Flow',
                 'price' => '$120',
                 'breakdown' => 'Just $40 per month',
-                'id' => env('STRIPE_PRICE_QUARTERLY'),
+                'id' => config('services.stripe.price_quarterly'),
             ],
             [
                 'name' => 'Semi-Annual Flow',
                 'price' => '$210',
                 'breakdown' => 'Save 12% - Just $35 per month',
-                'id' => env('STRIPE_PRICE_SEMI_ANNUAL'),
+                'id' => config('services.stripe.price_semi_annual'),
                 'popular' => true,
             ],
             [
                 'name' => 'Annual Flow',
                 'price' => '$360',
                 'breakdown' => 'Save 25% - Just $30 per month',
-                'id' => env('STRIPE_PRICE_ANNUAL'),
+                'id' => config('services.stripe.price_annual'),
             ],
         ];
 
@@ -50,70 +50,16 @@ class SubscriptionController extends Controller
         return view('pages.client.pricing', compact('plans', 'features', 'currentPlanId'));
     }
 
-    // public function checkout(Request $request)
-    // {
-    //     /** @var \App\Models\Client $client */
-    //     $client = Auth::guard('client')->user();
-
-    //     // 1. ĐÓN GÓI CƯỚC: Ưu tiên lấy từ URL, nếu trống (do vừa click link email về) thì lôi trong Session ra
-    //     $planId = $request->query('plan_type') ?? session('pending_plan_type');
-
-    //     // Xóa ngay Session sau khi lấy để giữ bộ nhớ sạch sẽ, tránh side-effect cho lần mua sau
-    //     if (session()->has('pending_plan_type')) {
-    //         session()->forget('pending_plan_type');
-    //     }
-
-    //     // CẤU HÌNH ĐỊA CHỈ TRẢ VỀ SAU KHI THANH TOÁN
-    //     $successUrl = route('dashboard') . '?payment=success';
-    //     $cancelUrl = route('client.pricing');
-
-    //     // 2. NẾU KHÁCH ĐÃ CÓ SUBSCRIPTION (Đang dùng Trial hoặc đang dùng Pro)
-    //     // Dùng hàm checkout trực tiếp từ $client để Stripe tự nhận diện yêu cầu cập nhật (Swap)
-    //     if ($client->subscribed('default')) {
-
-    //         // Nếu có truyền plan mới thì nâng cấp lên plan đó, nếu không thì giữ nguyên
-    //         if ($planId) {
-    //             return $client->newSubscription('default', $planId)
-    //                 ->checkout([
-    //                     'success_url' => $successUrl,
-    //                     'cancel_url'  => $cancelUrl,
-    //                 ]);
-    //         }
-
-    //         // Trường hợp chỉ muốn vào Billing Portal để tự quản lý (tránh lỗi nếu không truyền plan)
-    //         return $client->redirectToBillingPortal(route('dashboard'));
-    //     }
-
-    //     // 3. NẾU KHÁCH MỚI HOÀN TOÀN (CHƯA CÓ GÓI)
-
-    //     // Luồng mua gói cụ thể (Đã lấy được từ URL hoặc Session)
-    //     if ($planId) {
-    //         return $client->newSubscription('default', $planId)
-    //             ->checkout([
-    //                 'success_url' => $successUrl,
-    //                 'cancel_url'  => $cancelUrl,
-    //             ]);
-    //     }
-
-    //     // Luồng mặc định: Dùng thử 7 ngày (ép nhập thẻ) nếu hoàn toàn không tìm thấy gói nào
-    //     $defaultPriceId = env('STRIPE_PRICE_ID');
-
-    //     if (!$defaultPriceId) {
-    //         return redirect()->route('client.pricing')->with('error', 'Vui lòng chọn một gói cước để tiến hành thanh toán.');
-    //     }
-
-    //     return $client->newSubscription('default', $defaultPriceId)
-    //         ->trialDays(7)
-    //         ->checkout([
-    //             'success_url' => $successUrl,
-    //             'cancel_url'  => $cancelUrl,
-    //         ]);
-    // }
-
     public function checkout(Request $request)
     {
         /** @var \App\Models\Client $client */
         $client = Auth::guard('client')->user();
+
+        // CHỐT CHẶN: Nếu là VIP, cấm tạo link thanh toán
+        if ($client->is_vip) {
+            return redirect()->route('client.profile')
+                ->with('warning', 'Your account is VIP for life, no need to register for any additional packages.');
+        }
 
         // ==========================================
         // 1. ĐÓN GÓI CƯỚC TỪ URL HOẶC SESSION
@@ -135,7 +81,7 @@ class SubscriptionController extends Controller
 
             if ($planId) {
                 $subscription = $client->subscription('default');
-                
+
                 // Tránh lỗi: Khách bấm mua lại đúng gói đang dùng
                 if ($subscription->stripe_price === $planId) {
                     return redirect()->route('client.pricing')
@@ -143,13 +89,13 @@ class SubscriptionController extends Controller
                 }
 
                 try {
-                    // ĐỔI GÓI VÀ THU TIỀN CHÊNH LỆCH LẬP TỨC
-                    $subscription->swapAndInvoice($planId);
-                    
+                    // Stripe thực hiện đổi gói (Tính toán Proration và trừ tiền ngay lập tức)
+                    $subscription->skipTrial()->swapAndInvoice($planId);
+
+                    // THÀNH CÔNG: Chuyển hướng về Dashboard, Webhook sẽ lo việc ghi hóa đơn phía sau
                     return redirect()->route('dashboard')
                         ->with('payment', 'success')
-                        ->with('success', 'Upgrade successful! Transaction has been processed.');
-                        
+                        ->with('success', 'Plan updated successfully! Your billing history will be updated shortly.');
                 } catch (\Laravel\Cashier\Exceptions\IncompletePayment $e) {
                     // Xử lý bảo mật thẻ 3D Secure (Yêu cầu nhập OTP từ ngân hàng)
                     return redirect()->route(
@@ -157,7 +103,7 @@ class SubscriptionController extends Controller
                         [$e->payment->id, 'redirect' => route('dashboard')]
                     );
                 } catch (\Exception $e) {
-                    // Lỗi thẻ hết tiền hoặc bị khóa
+                    // Lỗi thẻ hết tiền, bị khóa, hoặc từ chối thanh toán
                     \Illuminate\Support\Facades\Log::error('Swap Plan Error: ' . $e->getMessage());
                     return redirect()->route('client.pricing')
                         ->with('error', 'Transaction failed. Please check your payment card or balance again.');
@@ -182,8 +128,8 @@ class SubscriptionController extends Controller
         }
 
         // Luồng mặc định: Dùng thử 7 ngày (ép nhập thẻ)
-        $defaultPriceId = env('STRIPE_PRICE_ID');
-        
+        $defaultPriceId = config('services.stripe.price_id');
+
         if (!$defaultPriceId) {
             return redirect()->route('client.pricing')->with('error', 'Please select a plan to proceed with payment.');
         }
@@ -220,8 +166,8 @@ class SubscriptionController extends Controller
 
         if ($subscription && $subscription->canceled() && $subscription->onGracePeriod()) {
             // Lệnh thần thánh của Cashier giúp hồi sinh gói cước
-            $subscription->resume(); 
-            
+            $subscription->resume();
+
             return redirect()->back()->with('success', 'Great! Your subscription has been resumed successfully.');
         }
 

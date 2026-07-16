@@ -1,40 +1,40 @@
-document.addEventListener("contextmenu", function (e) {
-    e.preventDefault();
-});
-document.addEventListener("keydown", function (e) {
-    if (e.keyCode === 123) {
-        e.preventDefault();
-        return false;
-    }
-    if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) {
-        e.preventDefault();
-        return false;
-    }
-    if (e.ctrlKey && e.keyCode === 85) {
-        e.preventDefault();
-        return false;
-    }
-    if (e.ctrlKey && e.keyCode === 83) {
-        e.preventDefault();
-        return false;
-    }
-});
+// document.addEventListener("contextmenu", function (e) {
+//     e.preventDefault();
+// });
+// document.addEventListener("keydown", function (e) {
+//     if (e.keyCode === 123) {
+//         e.preventDefault();
+//         return false;
+//     }
+//     if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) {
+//         e.preventDefault();
+//         return false;
+//     }
+//     if (e.ctrlKey && e.keyCode === 85) {
+//         e.preventDefault();
+//         return false;
+//     }
+//     if (e.ctrlKey && e.keyCode === 83) {
+//         e.preventDefault();
+//         return false;
+//     }
+// });
 
-document.addEventListener("contextmenu", (e) => e.preventDefault());
-document.addEventListener("keydown", function (e) {
-    if (
-        e.keyCode === 123 ||
-        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
-        (e.ctrlKey && e.keyCode === 85)
-    ) {
-        e.preventDefault();
-        return false;
-    }
-});
+// document.addEventListener("contextmenu", (e) => e.preventDefault());
+// document.addEventListener("keydown", function (e) {
+//     if (
+//         e.keyCode === 123 ||
+//         (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+//         (e.ctrlKey && e.keyCode === 85)
+//     ) {
+//         e.preventDefault();
+//         return false;
+//     }
+// });
 
-setInterval(function () {
-    debugger;
-}, 50);
+// setInterval(function () {
+//     debugger;
+// }, 50);
 
 document.addEventListener("DOMContentLoaded", function () {
     function attachLoadingEffect(formId, btnId, loadingText) {

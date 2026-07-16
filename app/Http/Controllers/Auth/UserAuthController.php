@@ -134,51 +134,33 @@ class UserAuthController extends Controller
         return view('pages.admin.clients.index', compact('clients'));
     }
 
-    public function pendingClients()
-    {
-        $pendingClients = Client::where('status', 'pending')
-            ->whereNull('expires_at')
-            ->orderBy('created_at', 'desc')
-            ->get();
-        return view('pages.admin.clients.pending', compact('pendingClients'));
-    }
-
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,approved,denied',
-            'duration' => 'nullable|string'
+            'status' => 'required|in:active,denied',
+            'is_vip' => 'required|boolean',
         ]);
 
+        /** @var \App\Models\Client $client */
         $client = Client::findOrFail($id);
+        
         $client->status = $request->status;
-
-        // Xử lý thời hạn truy cập nếu được duyệt
-        if ($request->status === 'approved') {
-            switch ($request->duration) {
-                case '7_days':
-                    $client->expires_at = Carbon::now()->addDays(7);
-                    break;
-                case '1_month':
-                    $client->expires_at = Carbon::now()->addMonth();
-                    break;
-                case '3_months':
-                    $client->expires_at = Carbon::now()->addMonths(3);
-                    break;
-                case 'lifetime':
-                    $client->expires_at = null; // Trọn đời
-                    break;
-                default:
-                    $client->expires_at = null;
-                    break;
-            }
-        } else {
-            // Nếu Deny hoặc Pending thì xóa ngày hết hạn (Reset)
-            $client->expires_at = null;
+        $client->is_vip = $request->is_vip; 
+        
+        // ==========================================
+        // CHỐT CHẶN BẢO VỆ TIỀN KHÁCH HÀNG (STRIPE SYNC)
+        // ==========================================
+        // Nếu Admin gạt nút cấp quyền VIP và khách đang có gói cước trên Stripe
+        if ($request->is_vip == 1 && $client->subscribed('default')) {
+            
+            // Hủy NGAY LẬP TỨC gói cước trên Stripe để chặn đứng mọi khoản thu phí trong tương lai
+            $client->subscription('default')->cancelNow();
+            
+            \Illuminate\Support\Facades\Log::info("Tự động hủy gói Stripe của khách {$client->email} vì được cấp quyền VIP.");
         }
 
         $client->save();
 
-        return back()->with('success', "Đã cập nhật trạng thái truy cập cho [{$client->name}] thành công!");
+        return back()->with('success', "Đã cập nhật đặc quyền cho [{$client->name}] thành công!");
     }
 }

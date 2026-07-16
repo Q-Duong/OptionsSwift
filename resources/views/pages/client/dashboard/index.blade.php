@@ -30,16 +30,16 @@
 
         if ($currentUser) {
             $subscription = $currentUser->subscription('default');
-            
+
             if ($subscription && $subscription->onTrial()) {
                 $isTrial = true;
-            
+
                 $diff = now()->diffInDays($subscription->trial_ends_at, false);
                 $daysLeft = $diff < 0 ? 0 : $diff + 1;
             }
         }
     @endphp
-    
+
     @if ($isTrial)
         <div class="trial-upgrade-banner">
             <div class="banner-content">
@@ -104,27 +104,44 @@
         <main class="main-column">
             <div class="main-header">
                 <h2>MARKET SCANNER</h2>
-                <span class="sub-header">LIVE DATA STREAM <span
-                        style="color: var(--primary-color);">●</span></span>
+                <span class="sub-header">LIVE DATA STREAM <span style="color: var(--primary-color);">●</span></span>
             </div>
 
-            <div class="scanner-container">
-                @php
-                    $scannerWidget = $widgets->firstWhere('key', 'market_scanner');
-                @endphp
+            @if (request()->query('payment') == 'success')
+                <!-- MÀN HÌNH CHỜ ĐỒNG BỘ WEBHOOK -->
+                <div class="sync-payment-screen"
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 400px; text-align: center;">
+                    <div class="auth-spinner"
+                        style="width: 40px; height: 40px; border-top-color: #22c55e; margin-bottom: 20px;"></div>
+                    <h3 style="color: #fff; font-size: 20px;">Verifying Your Payment...</h3>
+                    <p style="color: #a0aab2;">Please wait a moment while we sync your subscription data.</p>
 
-                @if ($scannerWidget)
-                    <iframe id="mainScannerIframe"
-                        src="{{ route('html.secure', 'market_scanner') }}?v={{ $scannerWidget->updated_at->timestamp }}"
-                        sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
-                @else
-                    <div
-                        style="padding: 40px; text-align: center; color: #ff4d4d; border: 1px dashed #ff4d4d; margin: 20px; border-radius: 8px;">
-                        <strong>SYSTEM ALERT:</strong> <br><br>
-                        <strong>Updating...</strong>
-                    </div>
-                @endif
-            </div>
+                    <script>
+                        setTimeout(function() {
+                            window.location.href = "{{ route('dashboard') }}";
+                        }, 4000);
+                    </script>
+                </div>
+            @else
+                <div class="scanner-container">
+                    @php
+                        $scannerWidget = $widgets->firstWhere('key', 'market_scanner');
+                    @endphp
+
+                    @if ($scannerWidget)
+                        <iframe id="mainScannerIframe"
+                            src="{{ route('html.secure', 'market_scanner') }}?v={{ $scannerWidget->updated_at->timestamp }}"
+                            sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+                    @else
+                        <div
+                            style="padding: 40px; text-align: center; color: #ff4d4d; border: 1px dashed #ff4d4d; margin: 20px; border-radius: 8px;">
+                            <strong>SYSTEM ALERT:</strong> <br><br>
+                            <strong>Updating...</strong>
+                        </div>
+                    @endif
+                </div>
+            @endif
+
         </main>
     </div>
 @endsection
