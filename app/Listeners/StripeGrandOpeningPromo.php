@@ -17,7 +17,7 @@ class StripeGrandOpeningPromo
 
         // 1. ĐỔI GÁC: Chỉ bắt sự kiện Hóa Đơn Đã Thanh Toán (invoice.paid)
         // Sự kiện này bao trọn cả mua mới qua Checkout lẫn 1-Click Upsell
-        if ($type !== 'invoice.paid') {
+        if (!in_array($type, ['invoice.paid', 'invoice.payment_succeeded'])) {
             return;
         }
 
@@ -35,40 +35,39 @@ class StripeGrandOpeningPromo
         // 3. ĐIỀU KIỆN VÀNG: Chỉ tặng cho Mua mới hoặc Nâng cấp gói
         // Bỏ qua 'subscription_cycle' (Gia hạn định kỳ) để không bị tặng lặp lại vào năm sau
         $isQualifyingPurchase = in_array($billingReason, [
-            'subscription_create', 
+            'subscription_create',
             'subscription_update'
         ]);
 
         if ($amountPaid > 0 && $customerId && $isQualifyingPurchase) {
             try {
                 $stripe = new StripeClient(config('services.stripe.secret'));
-                
+
                 // 1. Kéo thông tin khách hàng từ Stripe về
                 $customerDetails = $stripe->customers->retrieve($customerId);
-                
+
                 // 2. CHỐT CHẶN VÀNG: Kiểm tra xem đã đóng dấu nhận quà chưa?
                 if (isset($customerDetails->metadata['promo_received']) && $customerDetails->metadata['promo_received'] == 'true') {
                     Log::info("Khách hàng {$customerId} đã nhận KM trước đó, bỏ qua.");
                     return; // Đã nhận rồi thì quay xe luôn!
                 }
-                
+
                 // 3. Nếu chưa nhận thì tiến hành bơm tiền
                 $stripe->customers->createBalanceTransaction(
                     $customerId,
                     [
-                        'amount'      => -$amountPaid, 
+                        'amount'      => -$amountPaid,
                         'currency'    => $invoice['currency'],
                         'description' => 'Grand Opening Promo: 100% Credit for next renewal',
                     ]
                 );
-                
+
                 // 4. ĐÓNG DẤU ĐÃ NHẬN QUÀ VÀO METADATA CỦA KHÁCH
                 $stripe->customers->update($customerId, [
                     'metadata' => ['promo_received' => 'true']
                 ]);
-                
-                Log::info("Đã tặng khuyến mãi thành công cho Customer ID: {$customerId}");
 
+                Log::info("Đã tặng khuyến mãi thành công cho Customer ID: {$customerId}");
             } catch (\Exception $e) {
                 Log::error("Lỗi tặng khuyến mãi Stripe: " . $e->getMessage());
             }

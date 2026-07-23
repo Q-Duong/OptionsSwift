@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\Client\SubscriptionController;
 use App\Http\Controllers\Client\StripeWebhookController;
+use App\Http\Controllers\MarketDataController;
 use App\Http\Controllers\GammaController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
@@ -112,6 +113,9 @@ Route::middleware(['auth:client', 'client.banned'])->group(function () {
         Route::get('/dashboard', [ClientAuthController::class, 'dashboard'])->name('dashboard');
         Route::get('/secure-html/{key}', [ClientAuthController::class, 'serveSecureHtml'])->name('html.secure');
         Route::post('/api/gamma-data', [GammaController::class, 'fetchGammaData'])->name('client.api.gamma');
+
+        Route::get('/scanner/chain', [MarketDataController::class, 'fetchChain']);
+        Route::get('/scanner/vwap', [MarketDataController::class, 'fetchVwap']);
     });
 });
 

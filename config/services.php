@@ -40,4 +40,8 @@ return [
         'price_semi_annual' => env('STRIPE_PRICE_SEMI_ANNUAL'),
         'price_annual'      => env('STRIPE_PRICE_ANNUAL'),
     ],
+
+    'polygon' => [
+        'api_key' => env('POLYGON_API_KEY'),
+    ],
 ];
